@@ -13,6 +13,23 @@ const firebaseConfig = {
   measurementId: "G-LE4873R9JD"
 };
 
-const app = initializeApp(firebaseConfig);
+// 디버그 로그용 전역 선언
+declare global {
+  interface Window {
+    logToScreen: (msg: string, isError?: boolean) => void;
+  }
+}
+
+let app;
+try {
+  window.logToScreen("Initializing Firebase...");
+  app = initializeApp(firebaseConfig);
+  window.logToScreen("Firebase app initialized.");
+} catch (err) {
+  const errorMsg = err instanceof Error ? err.message : String(err);
+  window.logToScreen("Firebase Init Error: " + errorMsg, true);
+  throw err;
+}
+
 export const db = getFirestore(app);
 export const storage = getStorage(app);
