@@ -216,7 +216,7 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
             <div className="flex items-center gap-4">
               <Logo variant="light" className="w-16 h-16" />
               <div>
-                <h1 className="text-3xl font-black tracking-tighter uppercase text-white leading-none">Match Report</h1>
+                <h1 className="text-3xl font-black tracking-tighter uppercase text-white leading-none">경기 리포트</h1>
                 <p className="text-emerald-100 font-bold mt-1">마포70대 상비군 공식 기록</p>
               </div>
             </div>
@@ -230,16 +230,15 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 blur-3xl -mr-32 -mt-32 pointer-events-none" />
         </div>
 
-        {/* Score Section */}
+        {/* Score Section - 아이콘 제거 및 팀 이름 강조 */}
         <div className="p-8 sm:p-12 border-b border-zinc-100 bg-white text-zinc-900">
           <div className="flex justify-between items-center max-w-2xl mx-auto">
-            <div className="flex flex-col items-center gap-4 w-1/3">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-50 rounded-3xl flex items-center justify-center text-emerald-600 shadow-inner">
-                <Shield size={32} className="sm:w-10 sm:h-10" />
-              </div>
-              <span className="text-lg sm:text-xl font-black text-center leading-tight">마포70대<br/>상비군</span>
+            {/* Our Team */}
+            <div className="flex flex-col items-center justify-center w-1/3 min-h-[100px]">
+              <span className="text-xl sm:text-2xl font-black text-center leading-tight text-emerald-700">마포70대<br/>상비군</span>
             </div>
             
+            {/* Score Center */}
             <div className="flex flex-col items-center gap-2">
               <div className="flex items-center gap-4 sm:gap-8">
                 <span className="text-5xl sm:text-8xl font-black tabular-nums leading-none">{match.ourScore}</span>
@@ -249,15 +248,13 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
               <div className={`px-4 py-1.5 sm:px-6 sm:py-2 rounded-full font-black uppercase tracking-widest text-[10px] sm:text-sm ${
                 isWin ? 'bg-emerald-500 text-white' : isDraw ? 'bg-zinc-400 text-white' : 'bg-red-500 text-white'
               }`}>
-                {isWin ? 'Victory' : isDraw ? 'Draw' : 'Defeat'}
+                {isWin ? '승리' : isDraw ? '무승부' : '패배'}
               </div>
             </div>
 
-            <div className="flex flex-col items-center gap-4 w-1/3">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-zinc-50 rounded-3xl flex items-center justify-center text-zinc-400 shadow-inner">
-                <Users size={32} className="sm:w-10 sm:h-10" />
-              </div>
-              <span className="text-lg sm:text-xl font-black text-center leading-tight truncate w-full">{match.opponent}</span>
+            {/* Opponent Team */}
+            <div className="flex flex-col items-center justify-center w-1/3 min-h-[100px]">
+              <span className="text-xl sm:text-2xl font-black text-center leading-tight truncate w-full px-2">{match.opponent}</span>
             </div>
           </div>
         </div>
@@ -267,12 +264,12 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div className="space-y-4">
               <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2 px-1">
-                <Activity size={16} className="text-emerald-500" /> Match Venue
+                <Activity size={16} className="text-emerald-500" /> 경기 장소
               </h3>
               <div className="flex items-center gap-4 bg-zinc-50 p-5 rounded-3xl border border-zinc-100 shadow-sm">
                 <div className="p-3 bg-white rounded-xl shadow-sm text-emerald-600"><MapPin size={24} /></div>
                 <div>
-                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Stadium</p>
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">경기장</p>
                   <p className="font-black text-lg sm:text-xl leading-tight">{match.stadium}</p>
                 </div>
               </div>
@@ -280,11 +277,11 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
 
             <div className="space-y-4">
               <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2 px-1">
-                <Shield size={16} className="text-emerald-500" /> Team Performance
+                <Shield size={16} className="text-emerald-500" /> 팀 경기력
               </h3>
               <div className="bg-emerald-50 p-5 rounded-3xl border border-emerald-100 flex flex-col justify-center">
                 <div className="flex justify-between items-end mb-2">
-                  <span className="text-xs font-black text-emerald-800 uppercase tracking-tight">Efficiency</span>
+                  <span className="text-xs font-black text-emerald-800 uppercase tracking-tight">공격 효율</span>
                   <span className="text-xl font-black text-emerald-600">85%</span>
                 </div>
                 <div className="w-full h-3 bg-white rounded-full overflow-hidden p-0.5 shadow-inner">
@@ -296,7 +293,7 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
 
           <div className="space-y-6">
             <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2 px-1">
-              <Footprints size={16} className="text-emerald-500" /> Goal Scorers
+              <Footprints size={16} className="text-emerald-500" /> 득점 선수
             </h3>
             {match.scorers && match.scorers.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
@@ -312,15 +309,15 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
               </div>
             ) : (
               <div className="p-10 text-center bg-zinc-50 rounded-[2rem] border-2 border-dashed border-zinc-200">
-                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">No goals recorded</p>
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">득점 기록이 없습니다</p>
               </div>
             )}
           </div>
 
-          {/* Gallery Section - 사진 크기 극대화 (간격 및 여백 최소화) */}
+          {/* Gallery Section */}
           <div className="space-y-4 pt-8 border-t border-zinc-100 -mx-6 sm:mx-[-3rem]">
             <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2 mb-4 px-6 sm:px-12">
-              <ImageIcon size={16} className="text-emerald-500" /> Match Gallery
+              <ImageIcon size={16} className="text-emerald-500" /> 경기 갤러리
             </h3>
             {match.imageUrls && match.imageUrls.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-0.5">
@@ -346,7 +343,7 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-zinc-300 gap-2">
                         <AlertCircle size={32} />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Image Load Error</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">이미지 로드 실패</span>
                       </div>
                     )}
                   </div>
@@ -355,7 +352,7 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
             ) : (
               <div className="mx-6 sm:mx-12 py-16 rounded-[2rem] border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center text-zinc-200 gap-4 bg-zinc-50 shadow-inner">
                 <ImageIcon size={48} className="opacity-10" />
-                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">No match photos available</p>
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">등록된 사진이 없습니다</p>
               </div>
             )}
           </div>

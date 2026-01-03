@@ -138,7 +138,7 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="animate-spin text-emerald-600 w-10 h-10" />
-        <p className="text-zinc-500 font-medium font-bold">전술 데이터를 분석 중입니다...</p>
+        <p className="text-zinc-500 font-bold">경기 기록을 불러오는 중입니다...</p>
       </div>
     );
   }
@@ -146,7 +146,7 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
   return (
     <div className="space-y-10">
       <div className="space-y-6">
-        {/* Statistics Dashboard - Now at the Top */}
+        {/* Statistics Dashboard */}
         {stats && (
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
             <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm flex items-center gap-4">
@@ -154,7 +154,7 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
                 <Trophy size={24} />
               </div>
               <div>
-                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">Record (W-D-L)</p>
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">전적 (승-무-패)</p>
                 <p className="text-xl font-black text-zinc-900">
                   {stats.wins} <span className="text-zinc-300 font-normal">/</span> {stats.draws} <span className="text-zinc-300 font-normal">/</span> {stats.losses}
                 </p>
@@ -166,8 +166,8 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
                 <Target size={24} />
               </div>
               <div>
-                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">Total Goals</p>
-                <p className="text-xl font-black text-zinc-900">{stats.totalGoals} <span className="text-sm font-bold text-zinc-400">Goals</span></p>
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">총 득점</p>
+                <p className="text-xl font-black text-zinc-900">{stats.totalGoals} <span className="text-sm font-bold text-zinc-400">골</span></p>
               </div>
             </div>
 
@@ -176,9 +176,9 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
                 <Star size={24} />
               </div>
               <div>
-                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">Top Scorer</p>
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">최다 득점자</p>
                 <p className="text-xl font-black text-zinc-900 truncate max-w-[120px]">
-                  {stats.topScorer ? stats.topScorer.name : 'N/A'} 
+                  {stats.topScorer ? stats.topScorer.name : '없음'} 
                   {stats.topScorer && <span className="text-sm font-bold text-zinc-400 ml-1">({stats.topScorer.goals})</span>}
                 </p>
               </div>
@@ -189,14 +189,14 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
                 <TrendingUp size={24} />
               </div>
               <div>
-                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">Win Rate</p>
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">승률</p>
                 <p className="text-xl font-black text-zinc-900">{stats.winRate}%</p>
               </div>
             </div>
           </section>
         )}
 
-        {/* Search Bar UI - Now below the Stats */}
+        {/* Search Bar UI */}
         <section className="bg-white p-6 rounded-[2rem] border border-zinc-100 shadow-sm space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex bg-zinc-100 p-1 rounded-2xl w-full md:w-auto">
@@ -355,13 +355,13 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
                           isWin ? 'bg-emerald-100 text-emerald-700' : 
                           isDraw ? 'bg-zinc-100 text-zinc-600' : 'bg-red-100 text-red-700'
                         }`}>
-                          {isWin ? 'Victorious' : isDraw ? 'Draw' : 'Defeated'}
+                          {isWin ? '승리' : isDraw ? '무승부' : '패배'}
                         </div>
                       </div>
 
                       <div className="flex justify-between items-center mb-8 px-2">
                         <div className="flex flex-col items-center flex-1">
-                          <span className="text-[10px] font-black text-zinc-300 mb-1 uppercase tracking-widest">Home</span>
+                          <span className="text-[10px] font-black text-zinc-300 mb-1 uppercase tracking-widest">홈</span>
                           <span className="text-sm font-black text-zinc-900 text-center leading-tight">마포70대<br/>상비군</span>
                         </div>
                         <div className="text-4xl font-black text-zinc-900 mx-4 flex items-center gap-3">
@@ -370,7 +370,7 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
                           {match.opponentScore}
                         </div>
                         <div className="flex flex-col items-center flex-1">
-                          <span className="text-[10px] font-black text-zinc-300 mb-1 uppercase tracking-widest">Away</span>
+                          <span className="text-[10px] font-black text-zinc-300 mb-1 uppercase tracking-widest">원정</span>
                           <span className="text-sm font-black text-zinc-900 truncate max-w-[80px]">{match.opponent}</span>
                         </div>
                       </div>
@@ -386,19 +386,19 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Desktop Table: Visible on md and up */}
+              {/* Desktop Table */}
               <div className="hidden md:block bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden animate-in fade-in">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-zinc-50 border-b border-zinc-100">
                         {isAuthenticated && <th className="p-4 w-12"></th>}
-                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Date</th>
-                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Match</th>
-                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-center">Score</th>
-                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Venue</th>
-                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-center">Result</th>
-                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-right">Report</th>
+                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">날짜</th>
+                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">대진</th>
+                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-center">점수</th>
+                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">경기장</th>
+                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-center">결과</th>
+                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-right">리포트</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -446,7 +446,7 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
                                 isWin ? 'bg-emerald-500 text-white' : 
                                 isDraw ? 'bg-zinc-400 text-white' : 'bg-red-500 text-white'
                               }`}>
-                                {isWin ? 'W' : isDraw ? 'D' : 'L'}
+                                {isWin ? '승' : isDraw ? '무' : '패'}
                               </span>
                             </td>
                             <td className="p-4 text-right">
@@ -462,14 +462,14 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
                 </div>
               </div>
 
-              {/* Mobile List: Visible only on mobile */}
+              {/* Mobile List */}
               <div className="md:hidden space-y-3">
                 <div className="px-4 py-2 flex items-center justify-between text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-100">
-                  <div className="w-16">DATE</div>
-                  <div className="flex-1 text-center">MATCH</div>
-                  <div className="w-12 text-center">SCORE</div>
-                  <div className="w-16 text-center">VENUE</div>
-                  <div className="w-8 text-right">RESULT</div>
+                  <div className="w-16">날짜</div>
+                  <div className="flex-1 text-center">대진</div>
+                  <div className="w-12 text-center">점수</div>
+                  <div className="w-16 text-center">장소</div>
+                  <div className="w-8 text-right">결과</div>
                 </div>
                 {filteredMatches.map((match) => {
                   const isWin = match.ourScore > match.opponentScore;
@@ -505,7 +505,7 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
                           isWin ? 'bg-emerald-500 text-white' : 
                           isDraw ? 'bg-zinc-400 text-white' : 'bg-red-500 text-white'
                         }`}>
-                          {isWin ? 'W' : isDraw ? 'D' : 'L'}
+                          {isWin ? '승' : isDraw ? '무' : '패'}
                         </span>
                       </div>
                     </div>

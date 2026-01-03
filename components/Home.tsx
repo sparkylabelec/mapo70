@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Trophy, Users, Calendar, ArrowRight, Shield, 
@@ -22,7 +23,7 @@ const Home: React.FC<HomeProps> = ({ onStart, onAdminLogin }) => {
           {/* Badge */}
           <div className="mb-8 inline-flex items-center gap-3 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
             <Logo variant="light" className="w-5 h-5" />
-            <span className="text-white/90 text-[10px] font-black uppercase tracking-widest">Mapo Senior Elite Squad</span>
+            <span className="text-white/90 text-[10px] font-black uppercase tracking-widest">마포70대 상비군</span>
           </div>
 
           {/* Main Logo Container */}
@@ -76,6 +77,10 @@ const Home: React.FC<HomeProps> = ({ onStart, onAdminLogin }) => {
         <div className="bg-white p-10 rounded-[2.5rem] border border-zinc-100 shadow-sm flex flex-col justify-center">
           <Activity className="text-emerald-600 mb-6" size={40} />
           <h2 className="text-3xl font-black text-zinc-900 mb-4">건강한 열정, 끝없는 도전</h2>
+          <p className="text-zinc-500 leading-relaxed font-medium">
+            축구는 나이를 가리지 않습니다. 우리는 매 순간 최선을 다하며 필드 위에서 
+            젊음보다 더 뜨거운 열정을 증명하고 있습니다.
+          </p>
         </div>
         <div className="bg-emerald-50 p-10 rounded-[2.5rem] border border-emerald-100 flex flex-col justify-center relative overflow-hidden group">
           <div className="absolute -right-12 -top-12 w-48 h-48 bg-emerald-200/30 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-1000" />

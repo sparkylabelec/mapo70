@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, Trash2, Save, MapPin, Users, Calendar, Image as ImageIcon, X, Loader2, AlertCircle, Footprints } from 'lucide-react';
 import { Scorer, MatchResult } from '../types';
@@ -52,7 +53,7 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, initialData }) => {
 
       const totalCount = existingImageUrls.length + newImageFiles.length + validFiles.length;
       if (totalCount > 6) {
-        setError('최대 6장의 사진만 유지 가능합니다.');
+        setError('최대 6장의 사진만 등록 가능합니다.');
         return;
       }
 
@@ -160,19 +161,19 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, initialData }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
             <label className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2">
-              <Users size={16} /> Opponent Team
+              <Users size={16} /> 상대팀 이름
             </label>
             <input
               required
               value={opponent}
               onChange={(e) => setOpponent(e.target.value)}
               className="w-full px-5 py-3.5 border-2 border-zinc-100 rounded-2xl focus:border-emerald-500 outline-none transition-all font-bold text-zinc-800"
-              placeholder="상대 팀 이름"
+              placeholder="상대 팀 이름을 입력하세요"
             />
           </div>
           <div className="space-y-3">
             <label className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2">
-              <Calendar size={16} /> Match Date
+              <Calendar size={16} /> 경기 날짜
             </label>
             <input
               type="date"
@@ -188,7 +189,7 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, initialData }) => {
           <div className="grid grid-cols-2 gap-8 relative">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-zinc-200 text-4xl font-light">:</div>
             <div className="space-y-4">
-              <label className="block text-center text-[10px] font-black text-emerald-600 uppercase tracking-tighter">Our Score</label>
+              <label className="block text-center text-[10px] font-black text-emerald-600 uppercase tracking-tighter">우리 팀 점수</label>
               <input
                 type="number"
                 min="0"
@@ -198,7 +199,7 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, initialData }) => {
               />
             </div>
             <div className="space-y-4">
-              <label className="block text-center text-[10px] font-black text-zinc-400 uppercase tracking-tighter">Opponent Score</label>
+              <label className="block text-center text-[10px] font-black text-zinc-400 uppercase tracking-tighter">상대 팀 점수</label>
               <input
                 type="number"
                 min="0"
@@ -212,20 +213,20 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, initialData }) => {
 
         <div className="space-y-3">
           <label className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2">
-            <MapPin size={16} /> Stadium Name
+            <MapPin size={16} /> 경기장 명칭
           </label>
           <input
             required
             value={stadium}
             onChange={(e) => setStadium(e.target.value)}
             className="w-full px-5 py-3.5 border-2 border-zinc-100 rounded-2xl focus:border-emerald-500 outline-none transition-all font-bold text-zinc-800"
-            placeholder="경기장 위치"
+            placeholder="경기장의 위치나 이름을 입력하세요"
           />
         </div>
 
         <div className="space-y-4">
           <label className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2">
-            <ImageIcon size={16} /> Match Gallery (Max 6)
+            <ImageIcon size={16} /> 경기 갤러리 (최대 6장)
           </label>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
             {existingImageUrls.map((url, index) => (
@@ -250,7 +251,7 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, initialData }) => {
                 >
                   <Trash2 size={24} />
                 </button>
-                <div className="absolute top-1 right-1 bg-emerald-500 text-white text-[8px] px-1.5 py-0.5 rounded-full font-black">NEW</div>
+                <div className="absolute top-1 right-1 bg-emerald-500 text-white text-[8px] px-1.5 py-0.5 rounded-full font-black">신규</div>
               </div>
             ))}
             {(existingImageUrls.length + newImageFiles.length) < 6 && (
@@ -260,7 +261,7 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, initialData }) => {
                 className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-zinc-200 rounded-2xl text-zinc-300 hover:border-emerald-500 hover:text-emerald-500 hover:bg-emerald-50 transition-all group"
               >
                 <Plus size={32} className="group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] mt-2 font-black uppercase tracking-widest">Add Photo</span>
+                <span className="text-[10px] mt-2 font-black uppercase tracking-widest">사진 추가</span>
               </button>
             )}
           </div>
@@ -276,13 +277,13 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, initialData }) => {
 
         <div className="space-y-6 pt-4 border-t border-zinc-100">
           <div className="flex justify-between items-center">
-            <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Goal Scorers</label>
+            <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">득점 선수</label>
             <button
               type="button"
               onClick={addScorer}
               className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-colors text-xs font-black uppercase tracking-widest"
             >
-              <Plus size={16} /> Add Scorer
+              <Plus size={16} /> 득점자 추가
             </button>
           </div>
           
@@ -294,7 +295,7 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, initialData }) => {
                   <input
                     value={scorer.name}
                     onChange={(e) => updateScorer(index, 'name', e.target.value)}
-                    placeholder="선수명"
+                    placeholder="선수 이름을 입력하세요"
                     className="w-full pl-12 pr-4 py-3 border-2 border-zinc-50 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 bg-zinc-50 focus:bg-white transition-all"
                   />
                 </div>
@@ -329,7 +330,7 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, initialData }) => {
           ) : (
             <Save size={24} />
           )}
-          {initialData ? 'Update Report' : 'Publish Report'}
+          {initialData ? '리포트 수정하기' : '리포트 발행하기'}
         </button>
       </form>
     </div>

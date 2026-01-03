@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from 'react';
 import { MatchResult } from '../types';
 import { fetchMatchResults } from '../services/matchService';
@@ -56,7 +57,7 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-4">
         <Loader2 className="animate-spin text-emerald-600 w-12 h-12" />
-        <p className="text-zinc-500 font-bold animate-pulse font-bold uppercase tracking-widest text-xs">Analyzing Athlete Data...</p>
+        <p className="text-zinc-500 font-bold animate-pulse uppercase tracking-widest text-xs">선수 데이터를 분석 중입니다...</p>
       </div>
     );
   }
@@ -65,7 +66,7 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
     <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between mb-4">
         <button onClick={onBack} className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 font-bold transition-colors">
-          <ArrowLeft size={20} /> 뒤로 가기
+          <ArrowLeft size={20} /> 목록으로 돌아가기
         </button>
       </div>
 
@@ -76,16 +77,16 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
             <Star className="text-emerald-400 w-12 h-12 md:w-16 md:h-16" fill="currentColor" />
           </div>
           <div className="text-center md:text-left">
-            <span className="text-emerald-400 text-xs font-black uppercase tracking-[0.3em] mb-2 block">Mapo Elite Veteran</span>
+            <span className="text-emerald-400 text-xs font-black uppercase tracking-[0.3em] mb-2 block">마포 정예 상비군</span>
             <h2 className="text-4xl md:text-6xl font-black mb-2 uppercase tracking-tighter">{name}</h2>
             <div className="flex flex-wrap justify-center md:justify-start gap-4">
               <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5 shadow-sm">
                 <Target size={18} className="text-emerald-400" />
-                <span className="text-sm font-bold uppercase">Goals: <span className="text-emerald-400 ml-1">{stats.totalGoals}</span></span>
+                <span className="text-sm font-bold uppercase">득점: <span className="text-emerald-400 ml-1">{stats.totalGoals}</span></span>
               </div>
               <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5 shadow-sm">
                 <Activity size={18} className="text-blue-400" />
-                <span className="text-sm font-bold uppercase">Apps: <span className="text-blue-400 ml-1">{stats.matchCount}</span></span>
+                <span className="text-sm font-bold uppercase">출전: <span className="text-blue-400 ml-1">{stats.matchCount}</span></span>
               </div>
             </div>
           </div>
@@ -94,28 +95,28 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
-          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Goals Per Game</p>
+          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">경기당 득점</p>
           <p className="text-3xl font-black text-zinc-900">{stats.averageGoals}</p>
         </div>
         <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
-          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Participation</p>
-          <p className="text-3xl font-black text-zinc-900">{stats.matchCount} <span className="text-sm font-bold text-zinc-400">Games</span></p>
+          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">참여 기록</p>
+          <p className="text-3xl font-black text-zinc-900">{stats.matchCount} <span className="text-sm font-bold text-zinc-400">경기</span></p>
         </div>
         <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
-          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Impact Level</p>
-          <p className="text-3xl font-black text-emerald-600 uppercase tracking-tighter">{stats.totalGoals > 10 ? 'Elite' : 'Legendary'}</p>
+          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">영향력 수준</p>
+          <p className="text-3xl font-black text-emerald-600 uppercase tracking-tighter">{stats.totalGoals > 10 ? '엘리트' : '레전드'}</p>
         </div>
       </div>
 
       <div className="space-y-6">
         <h3 className="text-2xl font-black text-zinc-900 flex items-center gap-3 uppercase tracking-tight">
-          <Footprints className="text-emerald-600" /> Match Records
+          <Footprints className="text-emerald-600" /> 경기 기록
         </h3>
         
         <div className="space-y-4">
           {stats.playerMatches.length === 0 ? (
             <div className="bg-white p-12 rounded-[2rem] border-2 border-dashed border-zinc-100 text-center">
-              <p className="text-zinc-400 font-black uppercase tracking-widest text-xs">No Player Match History</p>
+              <p className="text-zinc-400 font-black uppercase tracking-widest text-xs">경기 참여 기록이 없습니다</p>
             </div>
           ) : (
             stats.playerMatches.map((m) => {
