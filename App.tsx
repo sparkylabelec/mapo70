@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LayoutGrid, PlusCircle, LogOut, ChevronRight, Home as HomeIcon } from 'lucide-react';
 import MatchList from './components/MatchList';
@@ -54,16 +53,12 @@ const App: React.FC = () => {
 
   const safePushState = (path: string) => {
     try {
-      // 샌드박스 환경에서는 도메인이 다르거나 blob URL일 경우 pushState가 금지됨
       const currentUrl = new URL(window.location.href);
       const newUrl = new URL(path, currentUrl.origin);
-      
-      // 도메인이 같을 때만 시도
       if (currentUrl.origin === newUrl.origin && !currentUrl.protocol.startsWith('blob')) {
         window.history.pushState({}, '', path);
       }
     } catch (e) {
-      // 보안 오류 발생 시 콘솔에만 기록하고 앱 동작은 유지
       console.debug("History API restricted in this environment");
     }
   };
@@ -145,7 +140,14 @@ const App: React.FC = () => {
             <AdminLogin onLogin={handleLoginSuccess} />
           )
         ) : view === 'report' && selectedMatchId ? (
-          <MatchReport id={selectedMatchId} onBack={handleGoBack} onViewScorerStats={handleViewScorerStats} isAuthenticated={isAuthenticated} onEdit={handleEditMatch} />
+          <MatchReport 
+            id={selectedMatchId} 
+            onBack={handleGoBack} 
+            onViewScorerStats={handleViewScorerStats} 
+            isAuthenticated={isAuthenticated} 
+            onEdit={handleEditMatch} 
+            onNavigate={handleViewReport}
+          />
         ) : view === 'scorer_stats' && selectedScorerName ? (
           <ScorerStats name={selectedScorerName} onBack={handleGoBack} onViewMatch={handleViewReport} />
         ) : (

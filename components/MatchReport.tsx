@@ -1,14 +1,13 @@
-
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { MatchResult } from '../types';
-import { deleteMatchResult } from '../services/matchService';
+import { deleteMatchResult, fetchMatchResults } from '../services/matchService';
 import Logo from './Logo';
 import { 
   ArrowLeft, MapPin, Calendar, Users, Footprints, Loader2, Link as LinkIcon,
   CheckCircle2, Activity, Image as ImageIcon, AlertCircle, Edit2, Trash2, 
-  ChevronRight, Shield, Download, X, Maximize2
+  ChevronRight, ChevronLeft, Shield, Download, X, Maximize2
 } from 'lucide-react';
 
 declare var html2canvas: any;
@@ -19,10 +18,12 @@ interface MatchReportProps {
   onViewScorerStats: (name: string) => void;
   isAuthenticated?: boolean;
   onEdit: (match: MatchResult) => void;
+  onNavigate?: (id: string) => void;
 }
 
-const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats, isAuthenticated, onEdit }) => {
+const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats, isAuthenticated, onEdit, onNavigate }) => {
   const [match, setMatch] = useState<MatchResult | null>(null);
+  const [allMatches, setAllMatches] = useState<MatchResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -32,6 +33,20 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
   
   const [selectedZoomImage, setSelectedZoomImage] = useState<string | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
+
+  // 이전/다음 경기 계산
+  const { prevMatch, nextMatch } = useMemo(() => {
+    if (allMatches.length === 0 || !id) return { prevMatch: null, nextMatch: null };
+    const currentIndex = allMatches.findIndex(m => m.id === id);
+    if (currentIndex === -1) return { prevMatch: null, nextMatch: null };
+    
+    // fetchMatchResults는 최신순(내림차순)으로 가져오므로
+    // 인덱스가 작을수록 더 최신 경기(다음 경기), 클수록 이전 경기임
+    return {
+      nextMatch: currentIndex > 0 ? allMatches[currentIndex - 1] : null,
+      prevMatch: currentIndex < allMatches.length - 1 ? allMatches[currentIndex + 1] : null
+    };
+  }, [allMatches, id]);
 
   // 이미지 프록시 URL 생성 (CORS 해결용)
   const getSecureProxyUrl = (url: string) => {
@@ -43,21 +58,28 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
   };
 
   useEffect(() => {
-    const fetchMatch = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
+        // 현재 경기 데이터
         const docRef = doc(db, 'matches', id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = { id: docSnap.id, ...docSnap.data() } as MatchResult;
           setMatch(data);
         }
+
+        // 전체 경기 목록 (내비게이션용)
+        const results = await fetchMatchResults();
+        setAllMatches(results);
       } catch (err) {
         console.error("[MatchReport] 데이터 로드 실패:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchMatch();
+    fetchData();
+    window.scrollTo(0, 0);
   }, [id]);
 
   const handleShare = () => {
@@ -88,7 +110,6 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
     }
   };
 
-  // 이미지를 Base64로 강제 변환하여 캔버스 오염 방지
   const toBase64 = async (url: string): Promise<string> => {
     try {
       const proxyUrl = getSecureProxyUrl(url);
@@ -121,14 +142,10 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
       const element = reportRef.current;
       const images = Array.from(element.querySelectorAll('img')) as HTMLImageElement[];
       
-      // 1. 모든 이미지를 미리 Base64로 변환 (CORS 원천 해결)
       const base64Images = await Promise.all(images.map(img => toBase64(img.src)));
-      
-      // 2. 원래 주소 백업 및 Base64로 교체
       const originalSrcs = images.map(img => img.src);
       images.forEach((img, i) => { img.src = base64Images[i]; });
 
-      // 3. 브라우저가 이미지를 다시 그릴 시간을 충분히 줌
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       const canvas = await canvasLib(element, {
@@ -139,7 +156,6 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
         logging: false,
       });
 
-      // 4. 이미지 주소 복구
       images.forEach((img, i) => { img.src = originalSrcs[i]; });
 
       const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
@@ -230,15 +246,13 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 blur-3xl -mr-32 -mt-32 pointer-events-none" />
         </div>
 
-        {/* Score Section - 아이콘 제거 및 팀 이름 강조 */}
+        {/* Score Section */}
         <div className="p-8 sm:p-12 border-b border-zinc-100 bg-white text-zinc-900">
           <div className="flex justify-between items-center max-w-2xl mx-auto">
-            {/* Our Team */}
             <div className="flex flex-col items-center justify-center w-1/3 min-h-[100px]">
               <span className="text-xl sm:text-2xl font-black text-center leading-tight text-emerald-700">마포70대<br/>상비군</span>
             </div>
             
-            {/* Score Center */}
             <div className="flex flex-col items-center gap-2">
               <div className="flex items-center gap-4 sm:gap-8">
                 <span className="text-5xl sm:text-8xl font-black tabular-nums leading-none">{match.ourScore}</span>
@@ -252,7 +266,6 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
               </div>
             </div>
 
-            {/* Opponent Team */}
             <div className="flex flex-col items-center justify-center w-1/3 min-h-[100px]">
               <span className="text-xl sm:text-2xl font-black text-center leading-tight truncate w-full px-2">{match.opponent}</span>
             </div>
@@ -314,7 +327,6 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
             )}
           </div>
 
-          {/* Gallery Section */}
           <div className="space-y-4 pt-8 border-t border-zinc-100 -mx-6 sm:mx-[-3rem]">
             <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2 mb-4 px-6 sm:px-12">
               <ImageIcon size={16} className="text-emerald-500" /> 경기 갤러리
@@ -358,6 +370,54 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
           </div>
         </div>
         
+        {/* Navigation Section (Prev/Next Match) - 인쇄 시 숨김 */}
+        <div className="p-6 sm:p-12 bg-zinc-50 border-t border-zinc-100 print:hidden">
+          <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-6 px-1">기록실 내비게이션</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* 이전 경기 (날짜순 이전 = 리스트 아래쪽) */}
+            {prevMatch ? (
+              <button 
+                onClick={() => onNavigate?.(prevMatch.id!)}
+                className="flex items-center gap-4 p-5 bg-white rounded-3xl border border-zinc-200 hover:border-emerald-500 hover:shadow-lg transition-all group text-left"
+              >
+                <div className="p-3 bg-zinc-100 rounded-2xl text-zinc-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                  <ChevronLeft size={24} />
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">이전 경기 리포트</p>
+                  <p className="font-black text-zinc-900 truncate">vs {prevMatch.opponent}</p>
+                  <p className="text-xs font-bold text-zinc-500">{prevMatch.date}</p>
+                </div>
+              </button>
+            ) : (
+              <div className="p-5 bg-zinc-100 rounded-3xl border border-dashed border-zinc-200 flex items-center justify-center">
+                <p className="text-xs font-black text-zinc-300 uppercase tracking-widest">첫 번째 경기입니다</p>
+              </div>
+            )}
+
+            {/* 다음 경기 (날짜순 다음 = 리스트 위쪽) */}
+            {nextMatch ? (
+              <button 
+                onClick={() => onNavigate?.(nextMatch.id!)}
+                className="flex items-center justify-end gap-4 p-5 bg-white rounded-3xl border border-zinc-200 hover:border-emerald-500 hover:shadow-lg transition-all group text-right"
+              >
+                <div className="flex-1 overflow-hidden">
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">다음 경기 리포트</p>
+                  <p className="font-black text-zinc-900 truncate">vs {nextMatch.opponent}</p>
+                  <p className="text-xs font-bold text-zinc-500">{nextMatch.date}</p>
+                </div>
+                <div className="p-3 bg-zinc-100 rounded-2xl text-zinc-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                  <ChevronRight size={24} />
+                </div>
+              </button>
+            ) : (
+              <div className="p-5 bg-zinc-100 rounded-3xl border border-dashed border-zinc-200 flex items-center justify-center">
+                <p className="text-xs font-black text-zinc-300 uppercase tracking-widest">최신 경기입니다</p>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Footer */}
         <div className="p-8 border-t border-zinc-100 bg-zinc-50 text-center">
           <div className="flex flex-col items-center gap-2">
@@ -367,7 +427,7 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
         </div>
       </div>
 
-      {/* Image Zoom Modal (Lightbox) */}
+      {/* Image Zoom Modal */}
       {selectedZoomImage && (
         <div 
           className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 sm:p-10 animate-in fade-in duration-300"
