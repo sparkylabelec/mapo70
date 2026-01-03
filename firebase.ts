@@ -22,12 +22,18 @@ declare global {
 
 let app;
 try {
-  window.logToScreen("Initializing Firebase...");
+  if (typeof window !== 'undefined' && window.logToScreen) {
+    window.logToScreen("Initializing Firebase...");
+  }
   app = initializeApp(firebaseConfig);
-  window.logToScreen("Firebase app initialized.");
+  if (typeof window !== 'undefined' && window.logToScreen) {
+    window.logToScreen("Firebase app initialized.");
+  }
 } catch (err) {
   const errorMsg = err instanceof Error ? err.message : String(err);
-  window.logToScreen("Firebase Init Error: " + errorMsg, true);
+  if (typeof window !== 'undefined' && window.logToScreen) {
+    window.logToScreen("Firebase Init Error: " + errorMsg, true);
+  }
   throw err;
 }
 
