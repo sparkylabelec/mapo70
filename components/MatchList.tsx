@@ -394,7 +394,7 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
                       <tr className="bg-zinc-50 border-b border-zinc-100">
                         {isAuthenticated && <th className="p-4 w-12"></th>}
                         <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">날짜</th>
-                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">대진</th>
+                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-center">대진</th>
                         <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-center">점수</th>
                         <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">경기장</th>
                         <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-center">결과</th>
@@ -422,9 +422,9 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
                             )}
                             <td className="p-4 text-sm font-bold text-zinc-500 font-mono">{match.date}</td>
                             <td className="p-4">
-                              <div className="flex items-center gap-3">
+                              <div className="flex items-center justify-center gap-2">
                                 <span className="text-sm font-black text-zinc-900">상비군</span>
-                                <span className="text-zinc-300 text-xs font-bold">VS</span>
+                                <span className="text-zinc-300 text-[10px] font-black uppercase">vs</span>
                                 <span className="text-sm font-black text-zinc-900">{match.opponent}</span>
                               </div>
                             </td>
@@ -486,10 +486,10 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
                         <span className="text-[10px] font-bold text-zinc-400 font-mono leading-tight">{match.date.split('-')[0]}</span>
                         <span className="text-xs font-black text-zinc-500 font-mono">{match.date.split('-').slice(1).join('-')}</span>
                       </div>
-                      <div className="flex-1 flex flex-col items-center justify-center gap-0.5">
+                      <div className="flex-1 flex items-center justify-center gap-1.5">
                         <span className="text-xs font-black text-zinc-900 leading-none">상비군</span>
-                        <span className="text-[8px] font-black text-zinc-300 uppercase leading-none">VS</span>
-                        <span className="text-xs font-black text-zinc-900 leading-none truncate max-w-[80px]">{match.opponent}</span>
+                        <span className="text-[8px] font-black text-zinc-300 uppercase leading-none">vs</span>
+                        <span className="text-xs font-black text-zinc-900 leading-none truncate max-w-[60px]">{match.opponent}</span>
                       </div>
                       <div className="w-12 text-center">
                         <span className="text-sm font-black text-zinc-900">{match.ourScore}</span>
