@@ -1,13 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { LayoutGrid, PlusCircle, LogOut, ChevronRight, Activity, Shield, Home as HomeIcon } from 'lucide-react';
-import MatchList from './components/MatchList';
-import MatchForm from './components/MatchForm';
-import AdminLogin from './components/AdminLogin';
-import MatchReport from './components/MatchReport';
-import ScorerStats from './components/ScorerStats';
-import Home from './components/Home';
-import Logo from './components/Logo';
-import { ViewType, MatchResult } from './types';
+import MatchList from './components/MatchList.tsx';
+import MatchForm from './components/MatchForm.tsx';
+import AdminLogin from './components/AdminLogin.tsx';
+import MatchReport from './components/MatchReport.tsx';
+import ScorerStats from './components/ScorerStats.tsx';
+import Home from './components/Home.tsx';
+import Logo from './components/Logo.tsx';
+import { ViewType, MatchResult } from './types.ts';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewType>('home');
@@ -211,7 +212,6 @@ const App: React.FC = () => {
         </button>
       )}
 
-      {/* Modern Footer */}
       <footer className="max-w-7xl mx-auto px-4 sm:px-6 py-12 border-t border-zinc-100 mt-20 print:hidden text-center sm:text-left">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-8">
           <div>
