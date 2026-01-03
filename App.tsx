@@ -23,16 +23,20 @@ const App: React.FC = () => {
       setIsAuthenticated(true);
     }
     
-    const params = new URLSearchParams(window.location.search);
-    const reportId = params.get('reportId');
-    const scorerName = params.get('scorer');
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const reportId = params.get('reportId');
+      const scorerName = params.get('scorer');
 
-    if (reportId) {
-      setSelectedMatchId(reportId);
-      setView('report');
-    } else if (scorerName) {
-      setSelectedScorerName(scorerName);
-      setView('scorer_stats');
+      if (reportId) {
+        setSelectedMatchId(reportId);
+        setView('report');
+      } else if (scorerName) {
+        setSelectedScorerName(scorerName);
+        setView('scorer_stats');
+      }
+    } catch (e) {
+      console.warn("URL 파라미터 읽기 실패:", e);
     }
   }, []);
 
@@ -40,6 +44,7 @@ const App: React.FC = () => {
     localStorage.removeItem('isAdminAuthenticated');
     setIsAuthenticated(false);
     setView('home');
+    safePushState('/');
   };
 
   const handleLoginSuccess = () => {
@@ -47,11 +52,26 @@ const App: React.FC = () => {
     setView('list');
   };
 
+  const safePushState = (path: string) => {
+    try {
+      // 샌드박스 환경에서는 도메인이 다르거나 blob URL일 경우 pushState가 금지됨
+      const currentUrl = new URL(window.location.href);
+      const newUrl = new URL(path, currentUrl.origin);
+      
+      // 도메인이 같을 때만 시도
+      if (currentUrl.origin === newUrl.origin && !currentUrl.protocol.startsWith('blob')) {
+        window.history.pushState({}, '', path);
+      }
+    } catch (e) {
+      // 보안 오류 발생 시 콘솔에만 기록하고 앱 동작은 유지
+      console.debug("History API restricted in this environment");
+    }
+  };
+
   const handleViewReport = (id: string) => {
     setSelectedMatchId(id);
     setView('report');
-    const newUrl = `${window.location.origin}${window.location.pathname}?reportId=${id}`;
-    window.history.pushState({ path: newUrl }, '', newUrl);
+    safePushState(`?reportId=${id}`);
   };
 
   const handleEditMatch = (match: MatchResult) => {
@@ -62,8 +82,7 @@ const App: React.FC = () => {
   const handleViewScorerStats = (name: string) => {
     setSelectedScorerName(name);
     setView('scorer_stats');
-    const newUrl = `${window.location.origin}${window.location.pathname}?scorer=${encodeURIComponent(name)}`;
-    window.history.pushState({ path: newUrl }, '', newUrl);
+    safePushState(`?scorer=${encodeURIComponent(name)}`);
   };
 
   const handleGoBack = () => {
@@ -71,8 +90,7 @@ const App: React.FC = () => {
     setSelectedMatchId(null);
     setSelectedScorerName(null);
     setEditingMatch(null);
-    const originUrl = `${window.location.origin}${window.location.pathname}`;
-    window.history.pushState({ path: originUrl }, '', originUrl);
+    safePushState('/');
   };
 
   const handleGoHome = () => {
@@ -80,8 +98,7 @@ const App: React.FC = () => {
     setSelectedMatchId(null);
     setSelectedScorerName(null);
     setEditingMatch(null);
-    const originUrl = `${window.location.origin}${window.location.pathname}`;
-    window.history.pushState({ path: originUrl }, '', originUrl);
+    safePushState('/');
   };
 
   return (
