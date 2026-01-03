@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutGrid, PlusCircle, LogOut, ChevronRight, Home as HomeIcon } from 'lucide-react';
+import { LayoutGrid, PlusCircle, LogOut, ChevronRight, Home as HomeIcon, Sparkles } from 'lucide-react';
 import MatchList from './components/MatchList';
 import MatchForm from './components/MatchForm';
 import AdminLogin from './components/AdminLogin';
 import MatchReport from './components/MatchReport';
 import ScorerStats from './components/ScorerStats';
+import AIInput from './components/AIInput';
 import Home from './components/Home';
 import Logo from './components/Logo';
 import { ViewType, MatchResult } from './types';
@@ -15,6 +16,7 @@ const App: React.FC = () => {
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const [selectedScorerName, setSelectedScorerName] = useState<string | null>(null);
   const [editingMatch, setEditingMatch] = useState<MatchResult | null>(null);
+  const [aiExtractedData, setAiExtractedData] = useState<Partial<MatchResult> | null>(null);
 
   useEffect(() => {
     const authStatus = localStorage.getItem('isAdminAuthenticated');
@@ -71,6 +73,7 @@ const App: React.FC = () => {
 
   const handleEditMatch = (match: MatchResult) => {
     setEditingMatch(match);
+    setAiExtractedData(null);
     setView('input');
   };
 
@@ -85,6 +88,7 @@ const App: React.FC = () => {
     setSelectedMatchId(null);
     setSelectedScorerName(null);
     setEditingMatch(null);
+    setAiExtractedData(null);
     safePushState('/');
   };
 
@@ -93,7 +97,23 @@ const App: React.FC = () => {
     setSelectedMatchId(null);
     setSelectedScorerName(null);
     setEditingMatch(null);
+    setAiExtractedData(null);
     safePushState('/');
+  };
+
+  const handleAiExtracted = (data: Partial<MatchResult>) => {
+    setAiExtractedData(data);
+    setEditingMatch(null);
+    setView('input');
+  };
+
+  // 폼 취소 시 동작 (AI 데이터가 있으면 AI 입력창으로, 아니면 목록으로)
+  const handleCancelForm = () => {
+    if (aiExtractedData) {
+      setView('ai_input');
+    } else {
+      handleGoBack();
+    }
   };
 
   return (
@@ -119,7 +139,8 @@ const App: React.FC = () => {
               <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-lg">
                 <button onClick={handleGoHome} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'home' ? 'bg-white shadow-sm text-emerald-600' : 'text-zinc-500 hover:text-zinc-700'}`}><HomeIcon size={16} /></button>
                 <button onClick={handleGoBack} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'list' ? 'bg-white shadow-sm text-emerald-600' : 'text-zinc-500 hover:text-zinc-700'}`}><LayoutGrid size={16} /> 목록</button>
-                <button onClick={() => { setEditingMatch(null); setView('input'); }} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'input' && !editingMatch ? 'bg-white shadow-sm text-emerald-600' : 'text-zinc-500 hover:text-zinc-700'}`}><PlusCircle size={16} /> 등록</button>
+                <button onClick={() => { setAiExtractedData(null); setView('ai_input'); }} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'ai_input' ? 'bg-white shadow-sm text-emerald-600' : 'text-zinc-500 hover:text-zinc-700'}`}><Sparkles size={16} /> AI 입력</button>
+                <button onClick={() => { setEditingMatch(null); setAiExtractedData(null); setView('input'); }} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'input' && !editingMatch && !aiExtractedData ? 'bg-white shadow-sm text-emerald-600' : 'text-zinc-500 hover:text-zinc-700'}`}><PlusCircle size={16} /> 등록</button>
                 <div className="w-px h-4 bg-zinc-300 mx-1" />
                 <button onClick={handleLogout} className="p-1.5 text-zinc-400 hover:text-red-500 transition-colors" title="로그아웃"><LogOut size={16} /></button>
               </div>
@@ -133,12 +154,15 @@ const App: React.FC = () => {
           <Home onStart={() => setView('list')} onAdminLogin={() => setView('login')} />
         ) : view === 'login' ? (
           <AdminLogin onLogin={handleLoginSuccess} />
+        ) : view === 'ai_input' ? (
+          <AIInput onDataExtracted={handleAiExtracted} onCancel={handleGoBack} />
         ) : view === 'input' ? (
-          isAuthenticated ? (
-            <MatchForm initialData={editingMatch} onSuccess={() => { setEditingMatch(null); setView('list'); }} />
-          ) : (
-            <AdminLogin onLogin={handleLoginSuccess} />
-          )
+          <MatchForm 
+            initialData={editingMatch} 
+            aiExtractedData={aiExtractedData}
+            onSuccess={() => { setEditingMatch(null); setAiExtractedData(null); setView('list'); }} 
+            onCancel={handleCancelForm}
+          />
         ) : view === 'report' && selectedMatchId ? (
           <MatchReport 
             id={selectedMatchId} 

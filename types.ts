@@ -11,8 +11,9 @@ export interface MatchResult {
   stadium: string;
   date: string;
   scorers: Scorer[];
+  playerCount?: number;
   imageUrls?: string[];
   createdAt: number;
 }
 
-export type ViewType = 'home' | 'list' | 'input' | 'login' | 'report' | 'scorer_stats';
+export type ViewType = 'home' | 'list' | 'input' | 'login' | 'report' | 'scorer_stats' | 'ai_input';
