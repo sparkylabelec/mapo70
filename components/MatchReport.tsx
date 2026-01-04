@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { MatchResult } from '../types';
 import { deleteMatchResult, fetchMatchResults } from '../services/matchService';
 import Logo from './Logo';
 import { 
-  ArrowLeft, MapPin, Calendar, Users, Footprints, Loader2, Link as LinkIcon,
-  CheckCircle2, Activity, Image as ImageIcon, AlertCircle, Edit2, Trash2, 
-  ChevronRight, ChevronLeft, Shield, Download, X, Maximize2, UserCheck
+  ArrowLeft, MapPin, Calendar, Footprints, Loader2, Link as LinkIcon,
+  CheckCircle2, Image as ImageIcon, AlertCircle, Edit2, Trash2, 
+  Download, X, UserCheck
 } from 'lucide-react';
 
 declare var html2canvas: any;
@@ -157,16 +157,16 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
         <div className="flex gap-2">
           {isAuthenticated && (
             <>
-              <button onClick={() => onEdit(match)} className="px-4 py-2 bg-white border rounded-xl font-bold text-zinc-700 hover:text-emerald-600"><Edit2 size={18} className="inline mr-1" /> 수정</button>
-              <button onClick={() => setShowDeleteConfirm(true)} className="px-4 py-2 bg-white border rounded-xl font-bold text-red-500 hover:bg-red-50"><Trash2 size={18} className="inline mr-1" /> 삭제</button>
+              <button onClick={() => onEdit(match)} className="px-4 py-2 bg-white border rounded-xl font-bold text-zinc-700 hover:text-emerald-600 transition-colors"><Edit2 size={18} className="inline mr-1" /> 수정</button>
+              <button onClick={() => setShowDeleteConfirm(true)} className="px-4 py-2 bg-white border rounded-xl font-bold text-red-500 hover:bg-red-50 transition-colors"><Trash2 size={18} className="inline mr-1" /> 삭제</button>
             </>
           )}
-          <button onClick={handleShare} className="px-4 py-2 bg-white border rounded-xl font-bold text-zinc-700"><LinkIcon size={18} className="inline mr-1" /> 링크</button>
-          <button onClick={handleDownloadJPG} disabled={isGenerating} className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-bold shadow-md">{isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} className="inline mr-1" />} JPG 저장</button>
+          <button onClick={handleShare} className="px-4 py-2 bg-white border rounded-xl font-bold text-zinc-700 hover:border-zinc-400 transition-colors"><LinkIcon size={18} className="inline mr-1" /> 링크</button>
+          <button onClick={handleDownloadJPG} disabled={isGenerating} className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-bold shadow-md hover:bg-emerald-700 transition-colors">{isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} className="inline mr-1" />} JPG 저장</button>
         </div>
       </div>
 
-      <div ref={reportRef} className="bg-white rounded-[2.5rem] shadow-xl border border-zinc-100 overflow-hidden">
+      <div ref={reportRef} className="bg-white rounded-[2.5rem] shadow-xl border border-zinc-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="bg-emerald-600 p-8 sm:p-12 text-white">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
@@ -209,15 +209,21 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
             {match.scorers && match.scorers.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 {match.scorers.map((scorer, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-transparent shadow-sm">
-                    <span className="font-black">{scorer.name}</span>
-                    <span className="w-8 h-8 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-black">{scorer.goals}</span>
+                  <div 
+                    key={idx} 
+                    onClick={() => onViewScorerStats(scorer.name)}
+                    className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-transparent shadow-sm cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 hover:scale-[1.02] transition-all group"
+                    title={`${scorer.name} 선수 기록 보기`}
+                  >
+                    <span className="font-black group-hover:text-emerald-700 transition-colors">{scorer.name}</span>
+                    <span className="w-8 h-8 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-black group-hover:bg-emerald-500 transition-colors shadow-sm">{scorer.goals}</span>
                   </div>
                 ))}
               </div>
             ) : (
               <p className="text-zinc-400 text-sm italic">득점 기록이 없습니다.</p>
             )}
+            <p className="text-[10px] text-zinc-400 font-bold px-1">* 선수 이름을 클릭하면 해당 선수의 개인 득점 통계 페이지로 이동합니다.</p>
           </div>
 
           {match.imageUrls && match.imageUrls.length > 0 && (
@@ -231,6 +237,9 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-zinc-300"><AlertCircle size={32} /></div>
                     )}
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                       <span className="text-white text-xs font-black uppercase tracking-widest border border-white/40 px-3 py-1.5 rounded-lg bg-black/20 backdrop-blur-sm">확대 보기</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -245,29 +254,31 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
       </div>
 
       {selectedZoomImage && (
-        <div className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setSelectedZoomImage(null)}>
-          <button className="absolute top-6 right-6 text-white/60"><X size={32} /></button>
-          <img src={getSecureProxyUrl(selectedZoomImage)} className="max-w-full max-h-[90vh] object-contain rounded-xl" />
+        <div className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={() => setSelectedZoomImage(null)}>
+          <button className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors" title="닫기"><X size={32} /></button>
+          <img src={getSecureProxyUrl(selectedZoomImage)} className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl animate-in zoom-in-95 duration-300" alt="확대된 이미지" />
         </div>
       )}
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm" onClick={() => setShowDeleteConfirm(false)} />
-          <div className="relative bg-white w-full max-w-sm p-8 rounded-[2.5rem] shadow-2xl text-center space-y-4">
-            <Trash2 size={40} className="mx-auto text-red-600" />
-            <h3 className="text-2xl font-black">리포트 삭제</h3>
-            <p className="text-zinc-500 text-sm">정말로 삭제하시겠습니까?</p>
+          <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setShowDeleteConfirm(false)} />
+          <div className="relative bg-white w-full max-w-sm p-8 rounded-[2.5rem] shadow-2xl text-center space-y-4 animate-in zoom-in-95 duration-300 border border-zinc-100">
+            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-2">
+              <Trash2 size={32} className="text-red-600" />
+            </div>
+            <h3 className="text-2xl font-black text-zinc-900">리포트 삭제</h3>
+            <p className="text-zinc-500 text-sm font-medium">정말로 이 경기 리포트를 삭제하시겠습니까?<br/>삭제 후에는 복구할 수 없습니다.</p>
             <div className="flex gap-3 pt-6">
-              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-4 bg-zinc-100 rounded-2xl font-black">취소</button>
-              <button onClick={handleDelete} className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-black">{isDeleting ? <Loader2 className="animate-spin inline" /> : '삭제'}</button>
+              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-2xl font-black transition-colors">취소</button>
+              <button onClick={handleDelete} className="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black shadow-lg shadow-red-100 transition-all active:scale-95">{isDeleting ? <Loader2 className="animate-spin inline" /> : '삭제하기'}</button>
             </div>
           </div>
         </div>
       )}
 
       {showToast && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200]">
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] animate-in slide-in-from-bottom-4">
           <div className={`px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border ${showToast.type === 'success' ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-red-600 border-red-500 text-white'}`}>
             {showToast.type === 'success' ? <CheckCircle2 size={20} className="text-emerald-400" /> : <AlertCircle size={20} />}
             <span className="font-black text-sm">{showToast.message}</span>
