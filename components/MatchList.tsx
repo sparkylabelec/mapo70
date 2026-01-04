@@ -4,7 +4,7 @@ import {
   Trophy, Frown, MapPin, Calendar, Loader2, Footprints, 
   Trash2, CheckSquare, Square, AlertCircle, X, ExternalLink,
   Activity, Target, Star, TrendingUp, Minus, LayoutGrid, List,
-  Search, Filter, User, Users, ArrowDown, ArrowUp
+  Search, Filter, User, Users
 } from 'lucide-react';
 import { MatchResult, Scorer } from '../types';
 import { fetchMatchResults, deleteMatchResult, deleteMultipleMatchResults } from '../services/matchService';
@@ -17,7 +17,6 @@ interface MatchListProps {
 type DeleteType = 'individual' | 'bulk';
 type ViewMode = 'card' | 'list';
 type SearchType = 'opponent' | 'scorer';
-type SortOrder = 'asc' | 'desc';
 
 interface PendingDelete {
   type: DeleteType;
@@ -30,7 +29,6 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
   const [viewMode, setViewMode] = useState<ViewMode>('card');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   
   // Search states
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,36 +54,21 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
     loadData();
   }, []);
 
-  const toggleSort = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-  };
-
-  // Filtering & Sorting Logic
+  // Filtering Logic
   const filteredMatches = useMemo(() => {
-    let result = [...matches];
+    if (!searchQuery.trim()) return matches;
     
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      const regex = new RegExp(query, 'i');
-      result = result.filter(m => {
-        if (searchType === 'opponent') {
-          return regex.test(m.opponent);
-        } else {
-          return m.scorers.some(s => regex.test(s.name));
-        }
-      });
-    }
+    const query = searchQuery.toLowerCase().trim();
+    const regex = new RegExp(query, 'i');
 
-    // 날짜 기준 정렬 적용
-    return result.sort((a, b) => {
-      if (sortOrder === 'desc') {
-        return b.date.localeCompare(a.date);
+    return matches.filter(m => {
+      if (searchType === 'opponent') {
+        return regex.test(m.opponent);
       } else {
-        return a.date.localeCompare(b.date);
+        return m.scorers.some(s => regex.test(s.name));
       }
     });
-  }, [matches, searchQuery, searchType, sortOrder]);
+  }, [matches, searchQuery, searchType]);
 
   const stats = useMemo(() => {
     if (filteredMatches.length === 0) return null;
@@ -410,17 +393,7 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
                     <thead>
                       <tr className="bg-zinc-50 border-b border-zinc-100">
                         {isAuthenticated && <th className="p-4 w-12"></th>}
-                        <th 
-                          onClick={toggleSort}
-                          className="p-4 text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-1 group cursor-pointer hover:bg-zinc-100 transition-colors"
-                        >
-                          날짜 
-                          {sortOrder === 'desc' ? (
-                            <ArrowDown size={14} className="opacity-100" />
-                          ) : (
-                            <ArrowUp size={14} className="opacity-100" />
-                          )}
-                        </th>
+                        <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">날짜</th>
                         <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-center">대진</th>
                         <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-center">점수</th>
                         <th className="p-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">경기장</th>
@@ -491,13 +464,8 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
 
               {/* Mobile List */}
               <div className="md:hidden space-y-3">
-                <div 
-                  onClick={toggleSort}
-                  className="px-4 py-2 flex items-center justify-between text-[10px] font-black text-emerald-600 uppercase tracking-widest border-b border-zinc-100 cursor-pointer hover:bg-zinc-50 transition-colors"
-                >
-                  <div className="w-16 flex items-center gap-1">
-                    날짜 {sortOrder === 'desc' ? <ArrowDown size={10} /> : <ArrowUp size={10} />}
-                  </div>
+                <div className="px-4 py-2 flex items-center justify-between text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-100">
+                  <div className="w-16">날짜</div>
                   <div className="flex-1 text-center">대진</div>
                   <div className="w-12 text-center">점수</div>
                   <div className="w-16 text-center">장소</div>
