@@ -210,7 +210,15 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 {match.scorers.map((scorer, idx) => (
                   <div key={idx} className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-transparent shadow-sm">
-                    <span className="font-black">{scorer.name}</span>
+                    <button 
+                      onClick={() => onViewScorerStats(scorer.name)}
+                      className="font-black text-zinc-900 hover:text-emerald-600 hover:underline transition-all text-left group"
+                    >
+                      <span className="flex items-center gap-2">
+                        {scorer.name}
+                        <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
+                      </span>
+                    </button>
                     <span className="w-8 h-8 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-black">{scorer.goals}</span>
                   </div>
                 ))}

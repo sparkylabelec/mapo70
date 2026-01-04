@@ -1,10 +1,9 @@
-
 import React, { useEffect, useState, useMemo } from 'react';
 import { MatchResult } from '../types';
 import { fetchMatchResults } from '../services/matchService';
 import { 
   ArrowLeft, Star, Target, TrendingUp, Calendar, MapPin, 
-  ChevronRight, Loader2, Footprints, Users, Activity
+  ChevronRight, Loader2, Footprints, Users, Activity, Trophy
 } from 'lucide-react';
 
 interface ScorerStatsProps {
@@ -52,6 +51,19 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
       matchCount: playerMatches.length
     };
   }, [matches, name]);
+
+  const allScorersRanking = useMemo(() => {
+    const scorerMap: Record<string, number> = {};
+    matches.forEach(m => {
+      m.scorers.forEach(s => {
+        scorerMap[s.name] = (scorerMap[s.name] || 0) + s.goals;
+      });
+    });
+    return Object.entries(scorerMap)
+      .map(([name, goals]) => ({ name, goals }))
+      .sort((a, b) => b.goals - a.goals)
+      .slice(0, 5);
+  }, [matches]);
 
   if (loading) {
     return (
@@ -108,9 +120,48 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
         </div>
       </div>
 
+      {/* Scorer Ranking Top 5 Section */}
       <div className="space-y-6">
-        <h3 className="text-2xl font-black text-zinc-900 flex items-center gap-3 uppercase tracking-tight">
-          <Footprints className="text-emerald-600" /> 경기 기록
+        <h3 className="text-xl font-black text-zinc-900 flex items-center gap-3 uppercase tracking-tight">
+          <Trophy className="text-amber-500" size={24} /> 전체 득점 랭킹 Top 5
+        </h3>
+        <div className="bg-white p-6 rounded-[2.5rem] border border-zinc-100 shadow-sm overflow-hidden">
+          <div className="flex flex-wrap gap-3">
+             {allScorersRanking.map((scorer, index) => {
+                const isCurrent = scorer.name === name;
+                return (
+                  <div 
+                    key={scorer.name} 
+                    className={`flex items-center gap-3 px-5 py-3 rounded-2xl border transition-all ${
+                      isCurrent 
+                        ? 'bg-emerald-50 border-emerald-200 ring-4 ring-emerald-500/10' 
+                        : 'bg-zinc-50 border-transparent hover:border-zinc-200'
+                    }`}
+                  >
+                     <span className={`w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black ${
+                       index === 0 ? 'bg-amber-400 text-white shadow-sm shadow-amber-200' : 
+                       index === 1 ? 'bg-zinc-300 text-white shadow-sm shadow-zinc-200' : 
+                       index === 2 ? 'bg-orange-300 text-white shadow-sm shadow-orange-200' : 
+                       'bg-zinc-200 text-zinc-500'
+                     }`}>
+                       {index + 1}
+                     </span>
+                     <span className={`font-black ${isCurrent ? 'text-emerald-700' : 'text-zinc-900'}`}>
+                       {scorer.name}
+                     </span>
+                     <span className={`text-sm font-black ${isCurrent ? 'text-emerald-600' : 'text-zinc-400'}`}>
+                       {scorer.goals}골
+                     </span>
+                  </div>
+                );
+             })}
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <h3 className="text-xl font-black text-zinc-900 flex items-center gap-3 uppercase tracking-tight">
+          <Footprints className="text-emerald-600" /> {name} 선수의 경기 기록
         </h3>
         
         <div className="space-y-4">
