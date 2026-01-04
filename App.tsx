@@ -117,7 +117,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col pb-20 print:p-0 print:pb-0 bg-[#f8fafc]">
+    <div className="min-h-screen pb-20 print:p-0 print:pb-0 bg-[#f8fafc]">
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-200 print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer group" onClick={handleGoHome}>
@@ -149,7 +149,7 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 print:p-0">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 print:p-0">
         {view === 'home' ? (
           <Home onStart={() => setView('list')} onAdminLogin={() => setView('login')} />
         ) : view === 'login' ? (
@@ -178,19 +178,6 @@ const App: React.FC = () => {
           <MatchList isAuthenticated={isAuthenticated} onViewReport={handleViewReport} />
         )}
       </main>
-
-      <footer className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-12 border-t border-zinc-200 mt-12 print:hidden">
-        <div className="flex flex-col items-center text-center gap-4">
-          <Logo variant="dark" className="w-10 h-10 opacity-20 grayscale" />
-          <div className="space-y-1">
-            <p className="text-zinc-600 font-black text-sm uppercase tracking-tighter">마포70대 상비군 축구단</p>
-            <p className="text-zinc-400 text-xs font-medium">서울특별시 마포구 잔다리로 30-1</p>
-          </div>
-          <p className="text-zinc-300 text-[10px] mt-4 font-bold uppercase tracking-[0.2em]">
-            © 2024 MAPO SENIOR ELITE SQUAD. ALL RIGHTS RESERVED.
-          </p>
-        </div>
-      </footer>
 
       {isAuthenticated && view === 'list' && (
         <button onClick={() => { setEditingMatch(null); setView('input'); }} className="fixed bottom-6 right-6 w-14 h-14 bg-zinc-900 hover:bg-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all active:scale-90 sm:hidden print:hidden">

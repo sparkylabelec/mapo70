@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState, useMemo } from 'react';
 import { MatchResult } from '../types';
 import { fetchMatchResults } from '../services/matchService';
 import { 
   ArrowLeft, Star, Target, TrendingUp, Calendar, MapPin, 
-  ChevronRight, Loader2, Footprints, Users, Activity, Trophy
+  ChevronRight, Loader2, Footprints, Users, Activity
 } from 'lucide-react';
 
 interface ScorerStatsProps {
@@ -11,6 +12,33 @@ interface ScorerStatsProps {
   onBack: () => void;
   onViewMatch: (id: string) => void;
 }
+
+const SoccerBallIcon = ({ size = 16, className = "" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <circle cx="12" cy="12" r="10" />
+    <path d="m12 12-4-2.5" />
+    <path d="m12 12 4-2.5" />
+    <path d="M12 12v5" />
+    <path d="m8 9.5-3.5-.5" />
+    <path d="m16 9.5 3.5-.5" />
+    <path d="M12 17H7.5" />
+    <path d="M12 17h4.5" />
+    <path d="m5.5 14-.5-4.5" />
+    <path d="m18.5 14 .5-4.5" />
+    <path d="m7.5 17-2-3" />
+    <path d="m16.5 17 2-3" />
+  </svg>
+);
 
 const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) => {
   const [matches, setMatches] = useState<MatchResult[]>([]);
@@ -51,19 +79,6 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
       matchCount: playerMatches.length
     };
   }, [matches, name]);
-
-  const allScorersRanking = useMemo(() => {
-    const scorerMap: Record<string, number> = {};
-    matches.forEach(m => {
-      m.scorers.forEach(s => {
-        scorerMap[s.name] = (scorerMap[s.name] || 0) + s.goals;
-      });
-    });
-    return Object.entries(scorerMap)
-      .map(([name, goals]) => ({ name, goals }))
-      .sort((a, b) => b.goals - a.goals)
-      .slice(0, 5);
-  }, [matches]);
 
   if (loading) {
     return (
@@ -120,48 +135,9 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
         </div>
       </div>
 
-      {/* Scorer Ranking Top 5 Section */}
       <div className="space-y-6">
-        <h3 className="text-xl font-black text-zinc-900 flex items-center gap-3 uppercase tracking-tight">
-          <Trophy className="text-amber-500" size={24} /> 전체 득점 랭킹 Top 5
-        </h3>
-        <div className="bg-white p-6 rounded-[2.5rem] border border-zinc-100 shadow-sm overflow-hidden">
-          <div className="flex flex-wrap gap-3">
-             {allScorersRanking.map((scorer, index) => {
-                const isCurrent = scorer.name === name;
-                return (
-                  <div 
-                    key={scorer.name} 
-                    className={`flex items-center gap-3 px-5 py-3 rounded-2xl border transition-all ${
-                      isCurrent 
-                        ? 'bg-emerald-50 border-emerald-200 ring-4 ring-emerald-500/10' 
-                        : 'bg-zinc-50 border-transparent hover:border-zinc-200'
-                    }`}
-                  >
-                     <span className={`w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black ${
-                       index === 0 ? 'bg-amber-400 text-white shadow-sm shadow-amber-200' : 
-                       index === 1 ? 'bg-zinc-300 text-white shadow-sm shadow-zinc-200' : 
-                       index === 2 ? 'bg-orange-300 text-white shadow-sm shadow-orange-200' : 
-                       'bg-zinc-200 text-zinc-500'
-                     }`}>
-                       {index + 1}
-                     </span>
-                     <span className={`font-black ${isCurrent ? 'text-emerald-700' : 'text-zinc-900'}`}>
-                       {scorer.name}
-                     </span>
-                     <span className={`text-sm font-black ${isCurrent ? 'text-emerald-600' : 'text-zinc-400'}`}>
-                       {scorer.goals}골
-                     </span>
-                  </div>
-                );
-             })}
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-6">
-        <h3 className="text-xl font-black text-zinc-900 flex items-center gap-3 uppercase tracking-tight">
-          <Footprints className="text-emerald-600" /> {name} 선수의 경기 기록
+        <h3 className="text-2xl font-black text-zinc-900 flex items-center gap-3 uppercase tracking-tight">
+          <Footprints className="text-emerald-600" /> 경기 기록
         </h3>
         
         <div className="space-y-4">
@@ -198,9 +174,9 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="hidden sm:flex items-center gap-1">
+                    <div className="hidden sm:flex items-center gap-1.5">
                       {[...Array(playerScorer?.goals)].map((_, i) => (
-                        <div key={i} className="w-2 h-2 bg-emerald-500 rounded-full shadow-sm shadow-emerald-200" />
+                        <SoccerBallIcon key={i} size={14} className="text-emerald-500 group-hover:text-emerald-400 transition-colors" />
                       ))}
                     </div>
                     <ChevronRight size={24} className="text-zinc-300 group-hover:text-emerald-600 transition-colors" />
