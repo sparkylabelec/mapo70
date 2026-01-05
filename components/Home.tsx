@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { 
-  ArrowRight, Activity, Star, ChevronRight 
+  ArrowRight, Activity, Star, ChevronRight, MapPin 
 } from 'lucide-react';
 import Logo from './Logo';
 
@@ -91,6 +92,25 @@ const Home: React.FC<HomeProps> = ({ onStart, onAdminLogin }) => {
           </button>
         </div>
       </section>
+
+      {/* Footer Section */}
+      <footer className="mt-16 py-12 border-t border-zinc-100 text-center animate-in fade-in slide-in-from-bottom-2 duration-1000">
+        <div className="flex flex-col items-center gap-6">
+          <Logo variant="dark" className="w-10 h-10 opacity-20 grayscale" />
+          <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2 text-zinc-500">
+              <MapPin size={16} className="text-zinc-300" />
+              <p className="text-sm sm:text-base font-bold tracking-tight">주소: 마포구 잔다리로 30-1</p>
+            </div>
+            <p className="text-[10px] sm:text-xs font-black text-zinc-300 uppercase tracking-[0.3em]">
+              Official Record of Mapo Senior Elite Squad
+            </p>
+            <p className="text-[9px] font-bold text-zinc-400 mt-4 opacity-60">
+              © 2025 Mapo70 Senior. All Rights Reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

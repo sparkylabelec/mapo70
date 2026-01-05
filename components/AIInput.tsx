@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Sparkles, Loader2, ArrowRight, AlertCircle, MessageSquare } from 'lucide-react';
+import { Sparkles, Loader2, MessageSquare, AlertCircle } from 'lucide-react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { MatchResult } from '../types';
 
@@ -23,7 +24,13 @@ const AIInput: React.FC<AIInputProps> = ({ onDataExtracted, onCancel }) => {
     setError(null);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // Vercel 환경 변수에서 주입된 API_KEY를 사용합니다.
+      const apiKey = process.env.API_KEY;
+      if (!apiKey) {
+        throw new Error("API_KEY가 설정되지 않았습니다. Vercel 환경 변수를 확인하세요.");
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: `다음은 축구 경기 결과에 대한 설명입니다. 정보를 추출하여 JSON 형식으로 반환하세요: "${inputText}"`,
@@ -65,11 +72,17 @@ const AIInput: React.FC<AIInputProps> = ({ onDataExtracted, onCancel }) => {
         },
       });
 
-      const extractedData = JSON.parse(response.text);
+      // response.text 속성을 사용하여 생성된 텍스트를 가져옵니다 (메서드 아님).
+      const jsonStr = response.text;
+      if (!jsonStr) {
+        throw new Error("AI로부터 응답을 받지 못했습니다.");
+      }
+
+      const extractedData = JSON.parse(jsonStr.trim());
       onDataExtracted(extractedData);
     } catch (err) {
-      console.error(err);
-      setError('AI가 내용을 이해하지 못했습니다. 다시 명확하게 입력해주세요.');
+      console.error("[AI 분석 오류]", err);
+      setError('AI가 내용을 분석하는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setLoading(false);
     }
