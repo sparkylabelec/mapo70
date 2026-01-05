@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { LayoutGrid, PlusCircle, LogOut, ChevronRight, Home as HomeIcon, Sparkles } from 'lucide-react';
 import MatchList from './components/MatchList';
@@ -173,7 +174,12 @@ const App: React.FC = () => {
             onNavigate={handleViewReport}
           />
         ) : view === 'scorer_stats' && selectedScorerName ? (
-          <ScorerStats name={selectedScorerName} onBack={handleGoBack} onViewMatch={handleViewReport} />
+          <ScorerStats 
+            name={selectedScorerName} 
+            onBack={handleGoBack} 
+            onViewMatch={handleViewReport} 
+            onViewScorer={handleViewScorerStats} 
+          />
         ) : (
           <MatchList isAuthenticated={isAuthenticated} onViewReport={handleViewReport} />
         )}

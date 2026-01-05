@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { MatchResult } from '../types';
@@ -21,6 +21,7 @@ interface MatchReportProps {
   onNavigate?: (id: string) => void;
 }
 
+// Fixed line 24: Added React to imports so React.FC namespace is available
 const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats, isAuthenticated, onEdit, onNavigate }) => {
   const [match, setMatch] = useState<MatchResult | null>(null);
   const [allMatches, setAllMatches] = useState<MatchResult[]>([]);

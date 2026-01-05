@@ -1,19 +1,20 @@
-
 import React, { useEffect, useState, useMemo } from 'react';
 import { MatchResult } from '../types';
 import { fetchMatchResults } from '../services/matchService';
 import { 
   ArrowLeft, Star, Target, TrendingUp, Calendar, MapPin, 
-  ChevronRight, Loader2, Footprints, Users, Activity
+  ChevronRight, Loader2, Footprints, Users, Activity, Medal
 } from 'lucide-react';
 
 interface ScorerStatsProps {
   name: string;
   onBack: () => void;
   onViewMatch: (id: string) => void;
+  onViewScorer: (name: string) => void;
 }
 
-const SoccerBallIcon = ({ size = 16, className = "" }) => (
+// Fixed line 13: Added React.FC type to handle intrinsic props like 'key' in list rendering
+const SoccerBallIcon: React.FC<{ size?: number; className?: string }> = ({ size = 16, className = "" }) => (
   <svg 
     width={size} 
     height={size} 
@@ -40,7 +41,7 @@ const SoccerBallIcon = ({ size = 16, className = "" }) => (
   </svg>
 );
 
-const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) => {
+const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch, onViewScorer }) => {
   const [matches, setMatches] = useState<MatchResult[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,7 +57,8 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
       }
     };
     loadData();
-  }, []);
+    window.scrollTo(0, 0);
+  }, [name]);
 
   const stats = useMemo(() => {
     const playerMatches = matches.filter(m => 
@@ -72,11 +74,25 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
       ? (totalGoals / playerMatches.length).toFixed(2) 
       : '0.00';
 
+    // TOP 5 득점자 산출
+    const scorerMap: Record<string, number> = {};
+    matches.forEach(m => {
+      m.scorers.forEach(s => {
+        scorerMap[s.name] = (scorerMap[s.name] || 0) + s.goals;
+      });
+    });
+
+    const topScorers = Object.entries(scorerMap)
+      .map(([playerName, goals]) => ({ name: playerName, goals }))
+      .sort((a, b) => b.goals - a.goals)
+      .slice(0, 5);
+
     return {
       playerMatches,
       totalGoals,
       averageGoals,
-      matchCount: playerMatches.length
+      matchCount: playerMatches.length,
+      topScorers
     };
   }, [matches, name]);
 
@@ -91,7 +107,7 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
 
   return (
     <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 px-2">
         <button onClick={onBack} className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 font-bold transition-colors">
           <ArrowLeft size={20} /> 목록으로 돌아가기
         </button>
@@ -109,7 +125,7 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
             <div className="flex flex-wrap justify-center md:justify-start gap-4">
               <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5 shadow-sm">
                 <Target size={18} className="text-emerald-400" />
-                <span className="text-sm font-bold uppercase">득점: <span className="text-emerald-400 ml-1">{stats.totalGoals}</span></span>
+                <span className="text-sm font-bold uppercase">총 득점: <span className="text-emerald-400 ml-1">{stats.totalGoals}</span></span>
               </div>
               <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5 shadow-sm">
                 <Activity size={18} className="text-blue-400" />
@@ -132,6 +148,42 @@ const ScorerStats: React.FC<ScorerStatsProps> = ({ name, onBack, onViewMatch }) 
         <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
           <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">영향력 수준</p>
           <p className="text-3xl font-black text-emerald-600 uppercase tracking-tighter">{stats.totalGoals > 10 ? '엘리트' : '레전드'}</p>
+        </div>
+      </div>
+
+      {/* TOP 5 득점 순위 명단 섹션 */}
+      <div className="bg-zinc-50 p-8 rounded-[2rem] border border-zinc-100 space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-black text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-2">
+            <Medal size={16} className="text-emerald-600" /> TOP 5 득점 순위
+          </h3>
+          <span className="text-[10px] font-bold text-zinc-300 uppercase">전체 시즌 기준</span>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {stats.topScorers.map((scorer, index) => (
+            <button
+              key={scorer.name}
+              onClick={() => onViewScorer(scorer.name)}
+              className={`flex items-center gap-3 px-5 py-3 rounded-2xl border transition-all hover:scale-105 active:scale-95 shadow-sm ${
+                scorer.name === name 
+                  ? 'bg-emerald-600 border-emerald-500 text-white ring-4 ring-emerald-500/10' 
+                  : 'bg-white border-zinc-100 text-zinc-900 hover:border-emerald-200'
+              }`}
+            >
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${
+                index === 0 ? 'bg-amber-400 text-amber-900' : 
+                index === 1 ? 'bg-zinc-300 text-zinc-800' :
+                index === 2 ? 'bg-amber-600/60 text-amber-950' :
+                'bg-zinc-100 text-zinc-400'
+              }`}>
+                {index + 1}
+              </div>
+              <span className="font-black text-sm">{scorer.name}</span>
+              <span className={`text-xs font-black ${scorer.name === name ? 'text-emerald-100' : 'text-emerald-600'}`}>
+                {scorer.goals}골
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
