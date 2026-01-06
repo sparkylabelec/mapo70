@@ -24,13 +24,8 @@ const AIInput: React.FC<AIInputProps> = ({ onDataExtracted, onCancel }) => {
     setError(null);
 
     try {
-      // Vercel 환경 변수에서 주입된 API_KEY를 사용합니다.
-      const apiKey = process.env.API_KEY;
-      if (!apiKey) {
-        throw new Error("API_KEY가 설정되지 않았습니다. Vercel 환경 변수를 확인하세요.");
-      }
-
-      const ai = new GoogleGenAI({ apiKey });
+      // Fix: Use process.env.API_KEY directly for initialization and remove manual validation as per Google GenAI guidelines.
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: `다음은 축구 경기 결과에 대한 설명입니다. 정보를 추출하여 JSON 형식으로 반환하세요: "${inputText}"`,

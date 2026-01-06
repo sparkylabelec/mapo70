@@ -13,52 +13,90 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ onStart, onAdminLogin }) => {
   return (
     <div className="animate-in fade-in duration-700">
-      {/* Hero Section: 스크린샷의 딥 그린 테마 및 레이아웃 반영 (높이 및 크기 70% 수준 조정) */}
+      {/* Hero Section: 강화된 축구장 패턴 디자인 */}
       <section className="relative rounded-[3rem] overflow-hidden mb-12 shadow-2xl min-h-[550px] sm:min-h-[650px] flex flex-col items-center justify-center">
-        {/* 배경색: 마포70대 상비군의 상징적인 딥 그린 */}
-        <div className="absolute inset-0 bg-[#064e3b] z-0" />
+        {/* 베이스 배경색: 깊고 진한 필드 그린 */}
+        <div className="absolute inset-0 bg-[#053e2f] z-0" />
         
-        {/* 배경 장식 원형 요소들 */}
-        <div className="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] sm:w-[450px] sm:h-[450px] bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none opacity-40" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] sm:w-[550px] sm:h-[550px] bg-emerald-400/10 rounded-full blur-[100px] pointer-events-none opacity-40" />
+        {/* 선명한 잔디 패턴 (격자형) */}
+        <div 
+          className="absolute inset-0 opacity-40 pointer-events-none"
+          style={{
+            backgroundImage: `
+              linear-gradient(90deg, rgba(0,0,0,0.2) 50%, transparent 50%),
+              linear-gradient(rgba(0,0,0,0.1) 50%, transparent 50%)
+            `,
+            backgroundSize: '15% 100%, 100% 15%'
+          }}
+        />
+
+        {/* 경기장 라인 디자인 (가시성 강화) */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* 외곽 사이드라인 */}
+          <div className="absolute inset-8 border-[2px] border-white/15 rounded-[2rem]" />
+
+          {/* 중앙선 (더 진하게) */}
+          <div className="absolute left-1/2 top-8 bottom-8 w-[2px] bg-white/25 -translate-x-1/2" />
+          
+          {/* 센터 서클 (더 선명하게) */}
+          <div className="absolute left-1/2 top-1/2 w-[280px] h-[280px] sm:w-[380px] sm:h-[380px] border-[2px] border-white/25 rounded-full -translate-x-1/2 -translate-y-1/2 shadow-[0_0_30px_rgba(255,255,255,0.05)]" />
+          <div className="absolute left-1/2 top-1/2 w-3 h-3 bg-white/40 rounded-full -translate-x-1/2 -translate-y-1/2" />
+          
+          {/* 좌측 골대 에어리어 (페널티 박스) */}
+          <div className="absolute left-8 top-1/2 -translate-y-1/2 w-[120px] h-[260px] sm:w-[180px] sm:h-[360px] border-[2px] border-white/20 border-l-0 rounded-r-xl bg-white/5" />
+          <div className="absolute left-8 top-1/2 -translate-y-1/2 w-[50px] h-[120px] sm:w-[70px] sm:h-[160px] border-[2px] border-white/20 border-l-0 rounded-r-lg" />
+          
+          {/* 우측 골대 에어리어 (페널티 박스) */}
+          <div className="absolute right-8 top-1/2 -translate-y-1/2 w-[120px] h-[260px] sm:w-[180px] sm:h-[360px] border-[2px] border-white/20 border-r-0 rounded-l-xl bg-white/5" />
+          <div className="absolute right-8 top-1/2 -translate-y-1/2 w-[50px] h-[120px] sm:w-[70px] sm:h-[160px] border-[2px] border-white/20 border-r-0 rounded-l-lg" />
+
+          {/* 코너킥 아크 */}
+          <div className="absolute top-8 left-8 w-12 h-12 border-b-[2px] border-r-[2px] border-white/20 rounded-full -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute top-8 right-8 w-12 h-12 border-b-[2px] border-l-[2px] border-white/20 rounded-full translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-8 left-8 w-12 h-12 border-t-[2px] border-r-[2px] border-white/20 rounded-full -translate-x-1/2 translate-y-1/2" />
+          <div className="absolute bottom-8 right-8 w-12 h-12 border-t-[2px] border-l-[2px] border-white/20 rounded-full translate-x-1/2 translate-y-1/2" />
+        </div>
+        
+        {/* 배경 글로우 효과 (포인트) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 px-6 py-12 sm:py-16 flex flex-col items-center text-center max-w-5xl mx-auto">
-          {/* 중앙 화이트 원형 로고 영역 (이전 요청에 따라 축소된 크기 유지) */}
+          {/* 중앙 로고 영역 */}
           <div className="mb-8 sm:mb-10 relative flex items-center justify-center">
-            {/* 은은한 동심원 장식 (축소된 크기) */}
-            <div className="absolute w-[160px] h-[160px] sm:w-[220px] sm:h-[220px] border border-white/5 rounded-full pointer-events-none" />
-            <div className="absolute w-[240px] h-[240px] sm:w-[310px] sm:h-[310px] border border-white/5 rounded-full pointer-events-none" />
+            {/* 동심원 장식 */}
+            <div className="absolute w-[180px] h-[180px] sm:w-[240px] sm:h-[240px] border border-white/10 rounded-full pointer-events-none animate-pulse" />
             
-            {/* 화이트 로고 박스 */}
-            <div className="w-32 h-32 sm:w-44 sm:h-44 bg-white rounded-full flex items-center justify-center shadow-[0_15px_30px_-8px_rgba(0,0,0,0.5)] border-[6px] sm:border-[8px] border-emerald-900/10 relative z-10">
-               <Logo className="w-[70%] h-[70%] relative z-10" />
+            {/* 로고 박스 */}
+            <div className="w-32 h-32 sm:w-44 sm:h-44 bg-white rounded-full flex items-center justify-center shadow-[0_25px_60px_rgba(0,0,0,0.4)] border-[8px] border-white/30 relative z-10 overflow-hidden group">
+               <div className="absolute inset-0 bg-gradient-to-tr from-emerald-50 via-white to-emerald-50 opacity-100" />
+               <Logo className="w-[70%] h-[70%] relative z-10 drop-shadow-2xl" />
             </div>
           </div>
           
-          {/* 대형 타이틀 */}
+          {/* 타이틀 */}
           <div className="mb-6 px-4">
             <h1 className="text-4xl sm:text-7xl lg:text-8xl font-black leading-tight sm:leading-none tracking-tighter">
-              <span className="text-white">마포70대</span>{' '}
-              <span className="text-[#10b981]">상비군</span>
+              <span className="text-white drop-shadow-lg">마포70대</span>{' '}
+              <span className="text-[#10b981] drop-shadow-lg">상비군</span>
             </h1>
           </div>
           
-          <p className="text-sm sm:text-xl text-white/60 font-medium mb-10 sm:mb-12 max-w-2xl leading-relaxed px-4">
-            서울시 마포구의 자부심, 70세 이상의 열정이 모여<br className="hidden sm:block" /> 
+          <p className="text-sm sm:text-xl text-white/80 font-bold mb-10 sm:mb-12 max-w-2xl leading-relaxed px-4 drop-shadow-md bg-black/10 backdrop-blur-sm py-2 rounded-2xl">
+            서울시 마포구의 자부심, 68세 이상의 열정이 모여<br className="hidden sm:block" /> 
             새로운 역사를 기록하는 명문 축구 클럽입니다.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-8 sm:px-0">
             <button 
               onClick={onStart}
-              className="group px-8 py-3.5 sm:px-12 sm:py-4 bg-[#10b981] hover:bg-emerald-400 text-zinc-950 font-black rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-emerald-500/20 text-base sm:text-lg"
+              className="group px-8 py-4 sm:px-14 sm:py-5 bg-[#10b981] hover:bg-emerald-400 text-zinc-950 font-black rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 shadow-[0_15px_30px_rgba(16,185,129,0.4)] text-base sm:text-lg uppercase tracking-tight"
             >
               경기 결과 보기 
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
             </button>
             <button 
               onClick={onAdminLogin}
-              className="px-8 py-3.5 sm:px-12 sm:py-4 bg-white/5 hover:bg-white/10 text-white font-black rounded-2xl border border-white/20 transition-all text-base sm:text-lg backdrop-blur-sm"
+              className="px-8 py-4 sm:px-14 sm:py-5 bg-white/5 hover:bg-white/15 text-white font-black rounded-2xl border-2 border-white/20 transition-all text-base sm:text-lg backdrop-blur-md shadow-lg"
             >
               관리자 접속
             </button>

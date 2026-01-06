@@ -4,7 +4,8 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
   // Vercel의 시스템 환경 변수를 포함하여 모든 환경 변수를 로드합니다.
-  const env = loadEnv(mode, process.cwd(), '');
+  // Fix: Property 'cwd' does not exist on type 'Process'. Casting process to any to access Node.js cwd() in the Vite config environment.
+  const env = loadEnv(mode, (process as any).cwd(), '');
   
   return {
     plugins: [react()],
