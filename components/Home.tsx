@@ -138,7 +138,7 @@ const Home: React.FC<HomeProps> = ({ onStart, onAdminLogin }) => {
           <div className="space-y-2">
             <div className="flex items-center justify-center gap-2 text-zinc-500">
               <MapPin size={16} className="text-zinc-300" />
-              <p className="text-sm sm:text-base font-bold tracking-tight">주소: 마포구 잔다리로 30-1</p>
+              <p className="text-sm sm:text-base font-bold tracking-tight">주소: 서울특별시 마포구 잔다리로 30-10</p>
             </div>
             <p className="text-[10px] sm:text-xs font-black text-zinc-300 uppercase tracking-[0.3em]">
               Official Record of Mapo Senior Elite Squad
