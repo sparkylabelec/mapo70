@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
-import { Sparkles, Loader2, MessageSquare, AlertCircle } from 'lucide-react';
 import { GoogleGenAI, Type } from "@google/genai";
+import { AlertCircle, Loader2, MessageSquare, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
 import { MatchResult } from '../types';
 
 interface AIInputProps {
@@ -24,8 +24,12 @@ const AIInput: React.FC<AIInputProps> = ({ onDataExtracted, onCancel }) => {
     setError(null);
 
     try {
-      // Fix: Use process.env.API_KEY directly for initialization and remove manual validation as per Google GenAI guidelines.
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+      // API 키 존재 여부 확인
+      if (!process.env.API_KEY) {
+        throw new Error('API_KEY_MISSING');
+      }
+
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: `다음은 축구 경기 결과에 대한 설명입니다. 정보를 추출하여 JSON 형식으로 반환하세요: "${inputText}"`,
@@ -67,17 +71,23 @@ const AIInput: React.FC<AIInputProps> = ({ onDataExtracted, onCancel }) => {
         },
       });
 
-      // response.text 속성을 사용하여 생성된 텍스트를 가져옵니다 (메서드 아님).
       const jsonStr = response.text;
       if (!jsonStr) {
-        throw new Error("AI로부터 응답을 받지 못했습니다.");
+        throw new Error("AI_NO_RESPONSE");
       }
 
       const extractedData = JSON.parse(jsonStr.trim());
       onDataExtracted(extractedData);
-    } catch (err) {
+    } catch (err: any) {
       console.error("[AI 분석 오류]", err);
-      setError('AI가 내용을 분석하는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      
+      if (err.message === 'API_KEY_MISSING') {
+        setError('API 키가 설정되지 않았습니다. Vercel 프로젝트 설정의 Environment Variables에 API_KEY를 추가해 주세요.');
+      } else if (err.status === 403 || err.message?.includes('403')) {
+        setError('API 키 권한 에러(403)입니다. 키가 유효한지 또는 Gemini 3 모델 접근 권한이 있는지 확인해 주세요.');
+      } else {
+        setError('AI가 내용을 분석하는 중 오류가 발생했습니다. Vercel 설정에서 API_KEY가 정확히 입력되었는지 확인 후 다시 시도해주세요.');
+      }
     } finally {
       setLoading(false);
     }
@@ -113,8 +123,8 @@ const AIInput: React.FC<AIInputProps> = ({ onDataExtracted, onCancel }) => {
 
           {error && (
             <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 text-red-700 rounded-2xl animate-in shake duration-500">
-              <AlertCircle size={20} />
-              <p className="text-xs font-bold">{error}</p>
+              <AlertCircle size={20} className="shrink-0" />
+              <p className="text-xs font-bold leading-relaxed">{error}</p>
             </div>
           )}
 

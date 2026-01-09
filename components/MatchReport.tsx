@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -21,7 +22,6 @@ interface MatchReportProps {
   onNavigate?: (id: string) => void;
 }
 
-// Fixed line 24: Added React to imports so React.FC namespace is available
 const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats, isAuthenticated, onEdit, onNavigate }) => {
   const [match, setMatch] = useState<MatchResult | null>(null);
   const [allMatches, setAllMatches] = useState<MatchResult[]>([]);
@@ -209,7 +209,10 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
             <h3 className="text-xs font-black text-zinc-400 uppercase flex items-center gap-2"><Footprints size={16} className="text-emerald-500" /> 득점 기록</h3>
             {match.scorers && match.scorers.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                {match.scorers.map((scorer, idx) => (
+                {[...match.scorers]
+                  .sort((a, b) => b.goals - a.goals)
+                  .slice(0, 5)
+                  .map((scorer, idx) => (
                   <div 
                     key={idx} 
                     onClick={() => onViewScorerStats(scorer.name)}
