@@ -24,7 +24,6 @@ const AIInput: React.FC<AIInputProps> = ({ onDataExtracted, onCancel }) => {
     setError(null);
 
     try {
-      // API 키 존재 여부 확인
       if (!process.env.API_KEY) {
         throw new Error('API_KEY_MISSING');
       }
@@ -42,6 +41,7 @@ const AIInput: React.FC<AIInputProps> = ({ onDataExtracted, onCancel }) => {
 5. date: 경기 날짜 (YYYY-MM-DD 형식)
 6. playerCount: 참여 인원수 (숫자)
 7. scorers: 득점자 목록 (name: 이름, goals: 골수)
+8. assists: 어시스트(도움) 선수 목록 (name: 이름, assists: 도움수)
 
 반드시 유효한 JSON 객체 하나만 반환하세요. 정보를 알 수 없는 경우 date는 오늘 날짜, 숫자는 0, 문자열은 ""로 채우세요.`,
           responseMimeType: "application/json",
@@ -64,9 +64,20 @@ const AIInput: React.FC<AIInputProps> = ({ onDataExtracted, onCancel }) => {
                   },
                   required: ["name", "goals"]
                 }
+              },
+              assists: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    name: { type: Type.STRING },
+                    assists: { type: Type.INTEGER }
+                  },
+                  required: ["name", "assists"]
+                }
               }
             },
-            required: ["opponent", "ourScore", "opponentScore", "stadium", "date", "playerCount", "scorers"]
+            required: ["opponent", "ourScore", "opponentScore", "stadium", "date", "playerCount", "scorers", "assists"]
           }
         },
       });
@@ -80,13 +91,10 @@ const AIInput: React.FC<AIInputProps> = ({ onDataExtracted, onCancel }) => {
       onDataExtracted(extractedData);
     } catch (err: any) {
       console.error("[AI 분석 오류]", err);
-      
       if (err.message === 'API_KEY_MISSING') {
         setError('API 키가 설정되지 않았습니다. Vercel 프로젝트 설정의 Environment Variables에 API_KEY를 추가해 주세요.');
-      } else if (err.status === 403 || err.message?.includes('403')) {
-        setError('API 키 권한 에러(403)입니다. 키가 유효한지 또는 Gemini 3 모델 접근 권한이 있는지 확인해 주세요.');
       } else {
-        setError('AI가 내용을 분석하는 중 오류가 발생했습니다. Vercel 설정에서 API_KEY가 정확히 입력되었는지 확인 후 다시 시도해주세요.');
+        setError('AI가 내용을 분석하는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
       }
     } finally {
       setLoading(false);
@@ -97,71 +105,29 @@ const AIInput: React.FC<AIInputProps> = ({ onDataExtracted, onCancel }) => {
     <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4">
       <div className="bg-white rounded-[2.5rem] shadow-xl border border-zinc-100 p-8 sm:p-12 overflow-hidden relative">
         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl -mr-16 -mt-16" />
-        
         <div className="relative z-10 space-y-8">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600">
-              <Sparkles size={28} />
-            </div>
+            <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600"><Sparkles size={28} /></div>
             <div>
               <h2 className="text-2xl font-black text-zinc-900 tracking-tight uppercase">AI 경기 결과 분석</h2>
               <p className="text-zinc-400 text-sm font-bold">자연어로 경기를 기록하고 자동으로 폼을 채워보세요</p>
             </div>
           </div>
-
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-xs font-black text-zinc-400 uppercase tracking-widest px-1">
-              <MessageSquare size={14} /> 경기 내용 입력
-            </div>
-            <textarea
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder="예: 어제 한강공원에서 용산FC랑 2대2로 비겼어. 13명 참석했고 박지성이 2골 넣었어."
-              className="w-full h-48 px-6 py-5 bg-zinc-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-3xl outline-none font-bold text-zinc-800 transition-all resize-none shadow-inner"
-            />
+            <div className="flex items-center gap-2 text-xs font-black text-zinc-400 uppercase tracking-widest px-1"><MessageSquare size={14} /> 경기 내용 입력</div>
+            <textarea value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="예: 어제 한강공원에서 용산FC랑 2대2로 비겼어. 박지성이 2골 넣었고 손흥민이 1도움 기록했어." className="w-full h-48 px-6 py-5 bg-zinc-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-3xl outline-none font-bold text-zinc-800 transition-all resize-none shadow-inner" />
           </div>
-
           {error && (
             <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 text-red-700 rounded-2xl animate-in shake duration-500">
-              <AlertCircle size={20} className="shrink-0" />
-              <p className="text-xs font-bold leading-relaxed">{error}</p>
+              <AlertCircle size={20} className="shrink-0" /><p className="text-xs font-bold leading-relaxed">{error}</p>
             </div>
           )}
-
           <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={onCancel}
-              className="flex-1 py-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-black rounded-2xl transition-all"
-            >
-              취소
-            </button>
-            <button
-              onClick={handleAnalyze}
-              disabled={loading || !inputText.trim()}
-              className="flex-[2] py-4 bg-zinc-900 hover:bg-black disabled:bg-zinc-200 text-white font-black rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-zinc-200"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="animate-spin" size={20} />
-                  분석 중...
-                </>
-              ) : (
-                <>
-                  <Sparkles size={20} />
-                  AI 분석하기
-                </>
-              )}
+            <button onClick={onCancel} className="flex-1 py-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-black rounded-2xl transition-all">취소</button>
+            <button onClick={handleAnalyze} disabled={loading || !inputText.trim()} className="flex-[2] py-4 bg-zinc-900 hover:bg-black disabled:bg-zinc-200 text-white font-black rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-zinc-200">
+              {loading ? <><Loader2 className="animate-spin" size={20} /> 분석 중...</> : <><Sparkles size={20} /> AI 분석하기</>}
             </button>
           </div>
-        </div>
-      </div>
-
-      <div className="mt-8 p-6 bg-emerald-50 rounded-3xl border border-emerald-100">
-        <h4 className="text-xs font-black text-emerald-800 uppercase tracking-widest mb-2">분석 가능한 항목</h4>
-        <div className="flex flex-wrap gap-2">
-          {['상대팀', '점수', '경기 일자', '장소', '참여 인원', '득점자'].map(tag => (
-            <span key={tag} className="px-3 py-1 bg-white rounded-lg text-[10px] font-black text-emerald-600 border border-emerald-200 shadow-sm">{tag}</span>
-          ))}
         </div>
       </div>
     </div>

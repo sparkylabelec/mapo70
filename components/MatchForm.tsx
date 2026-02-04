@@ -1,13 +1,14 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Trash2, Save, MapPin, Users, Calendar, Image as ImageIcon, X, Loader2, AlertCircle, Footprints, UserCheck, ArrowLeft } from 'lucide-react';
-import { Scorer, MatchResult } from '../types';
+import { Plus, Trash2, Save, MapPin, Users, Calendar, Image as ImageIcon, X, Loader2, AlertCircle, Footprints, UserCheck, ArrowLeft, Star } from 'lucide-react';
+import { Scorer, Assistant, MatchResult } from '../types';
 import { saveMatchResult, updateMatchResult } from '../services/matchService';
 import { storage } from '../firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface MatchFormProps {
   onSuccess: () => void;
-  onCancel?: () => void; // 취소 콜백 추가
+  onCancel?: () => void;
   initialData?: MatchResult | null;
   aiExtractedData?: Partial<MatchResult> | null;
 }
@@ -22,6 +23,7 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, onCancel, initialData,
   const [stadium, setStadium] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [scorers, setScorers] = useState<Scorer[]>([]);
+  const [assistants, setAssistants] = useState<Assistant[]>([]);
   const [playerCount, setPlayerCount] = useState<number>(11);
   
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
@@ -30,7 +32,6 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, onCancel, initialData,
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 초기 데이터 또는 AI 추출 데이터 반영
   useEffect(() => {
     const data = initialData || aiExtractedData;
     if (data) {
@@ -40,6 +41,7 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, onCancel, initialData,
       if (data.stadium !== undefined) setStadium(data.stadium);
       if (data.date !== undefined) setDate(data.date);
       if (data.scorers !== undefined) setScorers(data.scorers);
+      if (data.assists !== undefined) setAssistants(data.assists);
       if (data.playerCount !== undefined) setPlayerCount(data.playerCount);
       
       if (initialData?.imageUrls) {
@@ -86,6 +88,14 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, onCancel, initialData,
   };
   const removeScorer = (index: number) => setScorers(scorers.filter((_, i) => i !== index));
 
+  const addAssistant = () => setAssistants([...assistants, { name: '', assists: 1 }]);
+  const updateAssistant = (index: number, field: keyof Assistant, value: string | number) => {
+    const updated = [...assistants];
+    updated[index] = { ...updated[index], [field]: value };
+    setAssistants(updated);
+  };
+  const removeAssistant = (index: number) => setAssistants(assistants.filter((_, i) => i !== index));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!opponent || !stadium) {
@@ -110,6 +120,7 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, onCancel, initialData,
         stadium,
         date,
         scorers: scorers.filter(s => s.name.trim() !== ''),
+        assists: assistants.filter(a => a.name.trim() !== ''),
         playerCount: playerCount,
         imageUrls: finalImageUrls
       };
@@ -135,14 +146,7 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, onCancel, initialData,
           {initialData ? '경기 결과 수정' : aiExtractedData ? 'AI 데이터 검토' : '경기 결과 등록'}
         </h2>
         {onCancel && (
-          <button 
-            type="button" 
-            onClick={onCancel}
-            className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-all"
-            title="취소"
-          >
-            <X size={24} />
-          </button>
+          <button type="button" onClick={onCancel} className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-all"><X size={24} /></button>
         )}
       </div>
 
@@ -187,13 +191,7 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, onCancel, initialData,
           </div>
           <div className="space-y-3">
             <label className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2"><UserCheck size={16} /> 참여 인원수 (명)</label>
-            <input 
-              type="number" 
-              min="1" 
-              value={playerCount} 
-              onChange={(e) => setPlayerCount(parseInt(e.target.value) || 0)} 
-              className="w-full px-5 py-3.5 border-2 border-zinc-100 rounded-2xl focus:border-blue-500 outline-none font-bold text-zinc-800" 
-            />
+            <input type="number" min="1" value={playerCount} onChange={(e) => setPlayerCount(parseInt(e.target.value) || 0)} className="w-full px-5 py-3.5 border-2 border-zinc-100 rounded-2xl focus:border-blue-500 outline-none font-bold text-zinc-800" />
           </div>
         </div>
 
@@ -237,22 +235,29 @@ const MatchForm: React.FC<MatchFormProps> = ({ onSuccess, onCancel, initialData,
           </div>
         </div>
 
+        <div className="space-y-6 pt-4 border-t border-zinc-100">
+          <div className="flex justify-between items-center">
+            <label className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2"><Star size={16} className="text-amber-500" /> 어시스트 선수</label>
+            <button type="button" onClick={addAssistant} className="px-4 py-2 bg-amber-50 text-amber-700 rounded-xl text-xs font-black uppercase hover:bg-amber-100 transition-colors"><Plus size={16} className="inline mr-1" /> 추가</button>
+          </div>
+          <div className="space-y-3">
+            {assistants.map((assistant, index) => (
+              <div key={index} className="flex gap-3 items-center">
+                <input value={assistant.name} onChange={(e) => updateAssistant(index, 'name', e.target.value)} placeholder="선수명" className="flex-1 px-4 py-3 border-2 border-zinc-50 rounded-2xl text-sm font-bold outline-none focus:border-amber-500 bg-zinc-50 focus:bg-white transition-all" />
+                <input type="number" min="1" value={assistant.assists} onChange={(e) => updateAssistant(index, 'assists', parseInt(e.target.value) || 1)} className="w-20 px-4 py-3 border-2 border-zinc-50 rounded-2xl text-sm font-black text-center outline-none focus:border-amber-500 bg-zinc-50 focus:bg-white" />
+                <button type="button" onClick={() => removeAssistant(index)} className="p-3 text-zinc-300 hover:text-red-500"><Trash2 size={20} /></button>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row gap-3 pt-4">
           {onCancel && (
-            <button 
-              type="button" 
-              onClick={onCancel} 
-              className="flex-1 py-5 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-black rounded-3xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-            >
-              <ArrowLeft size={20} />
-              입력 취소
+            <button type="button" onClick={onCancel} className="flex-1 py-5 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-black rounded-3xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+              <ArrowLeft size={20} /> 입력 취소
             </button>
           )}
-          <button 
-            disabled={loading} 
-            type="submit" 
-            className="flex-[2] py-5 bg-zinc-900 hover:bg-black text-white font-black rounded-3xl flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50 shadow-xl shadow-zinc-200"
-          >
+          <button disabled={loading} type="submit" className="flex-[2] py-5 bg-zinc-900 hover:bg-black text-white font-black rounded-3xl flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50 shadow-xl shadow-zinc-200">
             {loading ? <Loader2 className="animate-spin" size={24} /> : <Save size={24} />}
             {initialData ? '리포트 수정하기' : '리포트 발행하기'}
           </button>

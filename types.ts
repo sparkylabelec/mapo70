@@ -1,6 +1,12 @@
+
 export interface Scorer {
   name: string;
   goals: number;
+}
+
+export interface Assistant {
+  name: string;
+  assists: number;
 }
 
 export interface MatchResult {
@@ -11,6 +17,7 @@ export interface MatchResult {
   stadium: string;
   date: string;
   scorers: Scorer[];
+  assists?: Assistant[];
   playerCount?: number;
   imageUrls?: string[];
   createdAt: number;

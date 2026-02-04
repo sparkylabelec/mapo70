@@ -8,7 +8,7 @@ import Logo from './Logo';
 import { 
   ArrowLeft, MapPin, Calendar, Footprints, Loader2, Link as LinkIcon,
   CheckCircle2, Image as ImageIcon, AlertCircle, Edit2, Trash2, 
-  Download, X, UserCheck
+  Download, X, UserCheck, Star
 } from 'lucide-react';
 
 declare var html2canvas: any;
@@ -34,16 +34,6 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
   
   const [selectedZoomImage, setSelectedZoomImage] = useState<string | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
-
-  const { prevMatch, nextMatch } = useMemo(() => {
-    if (allMatches.length === 0 || !id) return { prevMatch: null, nextMatch: null };
-    const currentIndex = allMatches.findIndex(m => m.id === id);
-    if (currentIndex === -1) return { prevMatch: null, nextMatch: null };
-    return {
-      nextMatch: currentIndex > 0 ? allMatches[currentIndex - 1] : null,
-      prevMatch: currentIndex < allMatches.length - 1 ? allMatches[currentIndex + 1] : null
-    };
-  }, [allMatches, id]);
 
   const getSecureProxyUrl = (url: string) => {
     if (!url) return '';
@@ -151,6 +141,14 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
   const isWin = match.ourScore > match.opponentScore;
   const isDraw = match.ourScore === match.opponentScore;
 
+  // 득점자 전체 정렬 (5명 제한 제거)
+  const allScorers = [...(match.scorers || [])]
+    .sort((a, b) => b.goals - a.goals);
+
+  // 어시스트 전체 정렬 (5명 제한 제거)
+  const allAssistants = [...(match.assists || [])]
+    .sort((a, b) => b.assists - a.assists);
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
       <div className="flex items-center justify-between mb-2 print:hidden px-2">
@@ -168,81 +166,141 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
       </div>
 
       <div ref={reportRef} className="bg-white rounded-[2.5rem] shadow-xl border border-zinc-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="bg-emerald-600 p-8 sm:p-12 text-white">
+        <div className="bg-emerald-600 p-6 sm:p-10 text-white">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <Logo variant="light" className="w-16 h-16" />
-              <div><h1 className="text-3xl font-black uppercase">경기 리포트</h1><p className="text-emerald-100 font-bold">마포70대 상비군</p></div>
-            </div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl border border-white/20"><Calendar size={18} /><span className="font-black text-xl">{match.date}</span></div>
-          </div>
-        </div>
-
-        <div className="p-8 sm:p-12 border-b border-zinc-100 text-zinc-900 text-center">
-          <div className="flex justify-between items-center max-w-2xl mx-auto">
-            <span className="text-xl sm:text-2xl font-black w-1/3">마포70대<br/>상비군</span>
-            <div className="flex flex-col items-center">
-              <div className="flex items-center gap-4 sm:gap-8">
-                <span className="text-5xl sm:text-8xl font-black">{match.ourScore}</span>
-                <span className="text-3xl font-light text-zinc-200">:</span>
-                <span className="text-5xl sm:text-8xl font-black">{match.opponentScore}</span>
+              <Logo variant="light" className="w-12 h-12 sm:w-16 sm:h-16" />
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight">경기 리포트</h1>
+                <p className="text-emerald-100 text-xs sm:text-sm font-bold opacity-80 tracking-widest">MAPO 70 SENIOR ELITE</p>
               </div>
-              <div className={`mt-2 px-4 py-1.5 rounded-full font-black uppercase tracking-widest text-xs ${isWin ? 'bg-emerald-500 text-white' : isDraw ? 'bg-zinc-400 text-white' : 'bg-red-500 text-white'}`}>{isWin ? '승리' : isDraw ? '무승부' : '패배'}</div>
             </div>
-            <span className="text-xl sm:text-2xl font-black w-1/3">{match.opponent}</span>
+            <div className="text-right">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-xl border border-white/20">
+                <Calendar size={16} />
+                <span className="font-black text-lg sm:text-xl">{match.date}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="p-6 sm:p-12 space-y-8 bg-white text-zinc-900">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-zinc-50 p-5 rounded-3xl border border-zinc-100">
-              <h3 className="text-xs font-black text-zinc-400 uppercase flex items-center gap-2 mb-3"><MapPin size={16} /> 경기 장소</h3>
-              <p className="font-black text-xl">{match.stadium}</p>
+        <div className="p-8 sm:p-16 border-b border-zinc-50 text-zinc-900 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/20 to-transparent pointer-events-none" />
+          <div className="flex justify-between items-center max-w-3xl mx-auto relative z-10">
+            <div className="w-1/3 flex flex-col items-center">
+               <span className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-3">Home</span>
+               <span className="text-xl sm:text-3xl font-black leading-tight">마포70대<br className="hidden sm:block" />상비군</span>
             </div>
-            <div className="bg-emerald-50 p-5 rounded-3xl border border-emerald-100">
-              <h3 className="text-xs font-black text-zinc-800 uppercase flex items-center gap-2 mb-3"><UserCheck size={16} /> 총 출전 인원</h3>
-              <p className="font-black text-xl text-emerald-700">{match.playerCount || 0} 명</p>
+            
+            <div className="flex flex-col items-center flex-1">
+              <div className="flex items-center gap-4 sm:gap-10">
+                <span className="text-6xl sm:text-9xl font-black tracking-tighter text-zinc-900 drop-shadow-sm">{match.ourScore}</span>
+                <span className="text-3xl sm:text-5xl font-light text-zinc-200">:</span>
+                <span className="text-6xl sm:text-9xl font-black tracking-tighter text-zinc-900 drop-shadow-sm">{match.opponentScore}</span>
+              </div>
+              <div className={`mt-6 px-6 py-2 rounded-full font-black uppercase tracking-[0.3em] text-xs sm:text-sm shadow-sm ${
+                isWin ? 'bg-emerald-500 text-white' : 
+                isDraw ? 'bg-zinc-400 text-white' : 'bg-red-500 text-white'
+              }`}>
+                {isWin ? '승리' : isDraw ? '무승부' : '패배'}
+              </div>
+            </div>
+
+            <div className="w-1/3 flex flex-col items-center">
+               <span className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.2em] mb-3">Away</span>
+               <span className="text-xl sm:text-3xl font-black leading-tight break-all px-2">{match.opponent}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8 sm:p-12 space-y-12 bg-white text-zinc-900">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-zinc-50 p-6 rounded-[2rem] border border-zinc-100 flex items-center gap-5 group transition-all hover:bg-zinc-100">
+              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-zinc-400 shadow-sm">
+                <MapPin size={24} />
+              </div>
+              <div>
+                <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">경기 장소</h3>
+                <p className="font-black text-lg sm:text-xl text-zinc-900">{match.stadium}</p>
+              </div>
+            </div>
+            <div className="bg-emerald-50 p-6 rounded-[2rem] border border-emerald-100 flex items-center gap-5 group transition-all hover:bg-emerald-100">
+              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-emerald-600 shadow-sm">
+                <UserCheck size={24} />
+              </div>
+              <div>
+                <h3 className="text-[10px] font-black text-emerald-700 uppercase tracking-widest mb-1">총 출전 인원</h3>
+                <p className="font-black text-lg sm:text-xl text-emerald-800">{match.playerCount || 0} <span className="text-sm">명</span></p>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-xs font-black text-zinc-400 uppercase flex items-center gap-2"><Footprints size={16} className="text-emerald-500" /> 득점 기록</h3>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-xs font-black text-zinc-400 uppercase flex items-center gap-2 tracking-[0.2em]">
+                <Footprints size={18} className="text-emerald-500" /> 득점 기록
+              </h3>
+            </div>
+            
             {match.scorers && match.scorers.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                {[...match.scorers]
-                  .sort((a, b) => b.goals - a.goals)
-                  .slice(0, 5)
-                  .map((scorer, idx) => (
-                  <div 
-                    key={idx} 
-                    onClick={() => onViewScorerStats(scorer.name)}
-                    className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-transparent shadow-sm cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 hover:scale-[1.02] transition-all group"
-                    title={`${scorer.name} 선수 기록 보기`}
-                  >
-                    <span className="font-black group-hover:text-emerald-700 transition-colors">{scorer.name}</span>
-                    <span className="w-8 h-8 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-black group-hover:bg-emerald-500 transition-colors shadow-sm">{scorer.goals}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {allScorers.map((scorer, idx) => (
+                  <div key={idx} onClick={() => onViewScorerStats(scorer.name)} className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-zinc-100 shadow-sm cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 hover:scale-[1.02] transition-all group relative overflow-hidden">
+                    <div className="flex items-center gap-3 relative z-10">
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black ${idx === 0 ? 'bg-emerald-600 text-white' : 'bg-zinc-200 text-zinc-500'}`}>{idx + 1}</div>
+                      <span className="font-black text-zinc-900 group-hover:text-emerald-700 transition-colors">{scorer.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2 relative z-10">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase">Goals</span>
+                      <span className="w-8 h-8 bg-zinc-900 text-white rounded-lg flex items-center justify-center font-black group-hover:bg-emerald-600 transition-all shadow-sm">{scorer.goals}</span>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-zinc-400 text-sm italic">득점 기록이 없습니다.</p>
+              <div className="py-8 bg-zinc-50 rounded-[2rem] border-2 border-dashed border-zinc-100 text-center"><p className="text-zinc-400 text-sm font-bold italic">득점 기록이 없습니다.</p></div>
             )}
-            <p className="text-[10px] text-zinc-400 font-bold px-1">* 선수 이름을 클릭하면 해당 선수의 개인 득점 통계 페이지로 이동합니다.</p>
           </div>
 
+          {match.assists && match.assists.length > 0 && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between px-1">
+                <h3 className="text-xs font-black text-zinc-400 uppercase flex items-center gap-2 tracking-[0.2em]">
+                  <Star size={18} className="text-amber-500" /> 어시스트 기록
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {allAssistants.map((assist, idx) => (
+                  <div key={idx} onClick={() => onViewScorerStats(assist.name)} className="flex items-center justify-between p-4 bg-amber-50/50 rounded-2xl border border-amber-100 shadow-sm cursor-pointer hover:bg-amber-50 hover:border-amber-200 hover:scale-[1.02] transition-all group relative overflow-hidden">
+                    <div className="flex items-center gap-3 relative z-10">
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black ${idx === 0 ? 'bg-amber-600 text-white' : 'bg-amber-100 text-amber-600'}`}>{idx + 1}</div>
+                      <span className="font-black text-zinc-900 group-hover:text-amber-700 transition-colors">{assist.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2 relative z-10">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase">Assts</span>
+                      <span className="w-8 h-8 bg-amber-500 text-white rounded-lg flex items-center justify-center font-black group-hover:bg-amber-600 transition-all shadow-sm">{assist.assists}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {match.imageUrls && match.imageUrls.length > 0 && (
-            <div className="space-y-4 pt-8 border-t border-zinc-100 -mx-6 sm:mx-[-3rem]">
-              <h3 className="px-6 sm:px-12 text-xs font-black text-zinc-400 uppercase flex items-center gap-2 mb-4"><ImageIcon size={16} /> 갤러리</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-0.5">
+            <div className="space-y-6 pt-10 border-t border-zinc-100">
+              <h3 className="text-xs font-black text-zinc-400 uppercase flex items-center gap-2 tracking-[0.2em] mb-4">
+                <ImageIcon size={18} className="text-emerald-500" /> 경기 갤러리
+              </h3>
+              <div className="grid grid-cols-2 gap-1 rounded-[2.5rem] overflow-hidden border border-zinc-200 shadow-inner bg-zinc-100">
                 {match.imageUrls.map((url, idx) => (
-                  <div key={idx} onClick={() => setSelectedZoomImage(url)} className="aspect-video bg-zinc-100 relative cursor-pointer active:opacity-80 overflow-hidden group">
+                  <div key={idx} onClick={() => setSelectedZoomImage(url)} className="aspect-[4/3] bg-zinc-200 relative cursor-pointer active:opacity-80 overflow-hidden group">
                     {!imageErrors[idx] ? (
-                      <img src={getSecureProxyUrl(url)} alt={`Highlight ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" onError={() => setImageErrors(prev => ({...prev, [idx]: true}))} />
+                      <img src={getSecureProxyUrl(url)} alt={`Highlight ${idx + 1}`} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" onError={() => setImageErrors(prev => ({...prev, [idx]: true}))} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-zinc-300"><AlertCircle size={32} /></div>
                     )}
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                       <span className="text-white text-xs font-black uppercase tracking-widest border border-white/40 px-3 py-1.5 rounded-lg bg-black/20 backdrop-blur-sm">확대 보기</span>
+                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[2px]">
+                       <div className="bg-white/90 p-3 rounded-full shadow-2xl scale-50 group-hover:scale-100 transition-transform duration-300"><ImageIcon className="text-emerald-600" size={24} /></div>
                     </div>
                   </div>
                 ))}
@@ -251,30 +309,28 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
           )}
         </div>
         
-        <div className="p-8 border-t border-zinc-100 bg-zinc-50 text-center">
-          <Logo variant="dark" className="w-8 h-8 opacity-20 grayscale mx-auto mb-2" />
-          <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.3em]">Official Record of Mapo Senior Elite Squad</p>
+        <div className="p-10 border-t border-zinc-50 bg-zinc-50/50 text-center">
+          <Logo variant="dark" className="w-10 h-10 opacity-20 grayscale mx-auto mb-4" />
+          <p className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.4em]">Official Record of Mapo Senior Elite Squad</p>
         </div>
       </div>
 
       {selectedZoomImage && (
-        <div className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={() => setSelectedZoomImage(null)}>
-          <button className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors" title="닫기"><X size={32} /></button>
-          <img src={getSecureProxyUrl(selectedZoomImage)} className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl animate-in zoom-in-95 duration-300" alt="확대된 이미지" />
+        <div className="fixed inset-0 z-[300] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={() => setSelectedZoomImage(null)}>
+          <button className="absolute top-8 right-8 text-white/40 hover:text-white transition-colors p-2" title="닫기"><X size={36} /></button>
+          <img src={getSecureProxyUrl(selectedZoomImage)} className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-[0_0_100px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-500" alt="확대된 이미지" />
         </div>
       )}
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setShowDeleteConfirm(false)} />
-          <div className="relative bg-white w-full max-w-sm p-8 rounded-[2.5rem] shadow-2xl text-center space-y-4 animate-in zoom-in-95 duration-300 border border-zinc-100">
-            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-2">
-              <Trash2 size={32} className="text-red-600" />
-            </div>
+          <div className="relative bg-white w-full max-w-sm p-10 rounded-[3rem] shadow-2xl text-center space-y-5 animate-in zoom-in-95 duration-300 border border-zinc-100">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-2 text-red-600"><Trash2 size={40} /></div>
             <h3 className="text-2xl font-black text-zinc-900">리포트 삭제</h3>
-            <p className="text-zinc-500 text-sm font-medium">정말로 이 경기 리포트를 삭제하시겠습니까?<br/>삭제 후에는 복구할 수 없습니다.</p>
-            <div className="flex gap-3 pt-6">
-              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-2xl font-black transition-colors">취소</button>
+            <p className="text-zinc-500 text-sm font-medium leading-relaxed">정말로 이 경기 리포트를 삭제하시겠습니까?<br/>삭제 후에는 복구할 수 없습니다.</p>
+            <div className="flex gap-3 pt-4">
+              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-2xl font-black transition-all">취소</button>
               <button onClick={handleDelete} className="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black shadow-lg shadow-red-100 transition-all active:scale-95">{isDeleting ? <Loader2 className="animate-spin inline" /> : '삭제하기'}</button>
             </div>
           </div>
@@ -283,9 +339,9 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
 
       {showToast && (
         <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] animate-in slide-in-from-bottom-4">
-          <div className={`px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border ${showToast.type === 'success' ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-red-600 border-red-500 text-white'}`}>
-            {showToast.type === 'success' ? <CheckCircle2 size={20} className="text-emerald-400" /> : <AlertCircle size={20} />}
-            <span className="font-black text-sm">{showToast.message}</span>
+          <div className={`px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border ${showToast.type === 'success' ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-red-600 border-red-500 text-white'}`}>
+            {showToast.type === 'success' ? <CheckCircle2 size={24} className="text-emerald-400" /> : <AlertCircle size={24} />}
+            <span className="font-black text-sm tracking-tight">{showToast.message}</span>
           </div>
         </div>
       )}
