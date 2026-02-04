@@ -4,9 +4,9 @@ import {
   Trophy, Frown, MapPin, Calendar, Loader2, Footprints, 
   Trash2, CheckSquare, Square, AlertCircle, X, ExternalLink,
   Activity, Target, Star, TrendingUp, Minus, LayoutGrid, List,
-  Search, Filter, User, Users, ArrowDown, ArrowUp
+  Search, Filter, User, Users, ArrowDown, ArrowUp, Medal
 } from 'lucide-react';
-import { MatchResult, Scorer } from '../types';
+import { MatchResult, Scorer, Assistant } from '../types';
 import { fetchMatchResults, deleteMatchResult, deleteMultipleMatchResults } from '../services/matchService';
 
 interface MatchListProps {
@@ -95,6 +95,7 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
     let losses = 0;
     let totalGoals = 0;
     const scorerMap: Record<string, number> = {};
+    const assistantMap: Record<string, number> = {};
 
     filteredMatches.forEach(m => {
       if (m.ourScore > m.opponentScore) wins++;
@@ -106,13 +107,21 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
       m.scorers.forEach(s => {
         scorerMap[s.name] = (scorerMap[s.name] || 0) + s.goals;
       });
+
+      m.assists?.forEach(a => {
+        assistantMap[a.name] = (assistantMap[a.name] || 0) + a.assists;
+      });
     });
 
     const topScorerEntry = Object.entries(scorerMap).sort((a, b) => b[1] - a[1])[0];
     const topScorer = topScorerEntry ? { name: topScorerEntry[0], goals: topScorerEntry[1] } : null;
+
+    const topAssistantEntry = Object.entries(assistantMap).sort((a, b) => b[1] - a[1])[0];
+    const topAssistant = topAssistantEntry ? { name: topAssistantEntry[0], assists: topAssistantEntry[1] } : null;
+
     const winRate = ((wins / filteredMatches.length) * 100).toFixed(1);
 
-    return { wins, draws, losses, totalGoals, topScorer, winRate, totalMatches: filteredMatches.length };
+    return { wins, draws, losses, totalGoals, topScorer, topAssistant, winRate, totalMatches: filteredMatches.length };
   }, [filteredMatches]);
 
   const openDeleteModal = (e: React.MouseEvent, type: DeleteType, id?: string) => {
@@ -165,14 +174,14 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
       <div className="space-y-6">
         {/* Statistics Dashboard */}
         {stats && (
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
             <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm flex items-center gap-4">
               <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
                 <Trophy size={24} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">전적 (승-무-패)</p>
-                <p className="text-xl font-black text-zinc-900">
+                <p className="text-xl font-black text-zinc-900 truncate">
                   {stats.wins} <span className="text-zinc-300 font-normal">/</span> {stats.draws} <span className="text-zinc-300 font-normal">/</span> {stats.losses}
                 </p>
               </div>
@@ -182,7 +191,7 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
                 <Target size={24} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">총 득점</p>
                 <p className="text-xl font-black text-zinc-900">{stats.totalGoals} <span className="text-sm font-bold text-zinc-400">골</span></p>
               </div>
@@ -192,11 +201,24 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
               <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
                 <Star size={24} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">최다 득점자</p>
-                <p className="text-xl font-black text-zinc-900 truncate max-w-[120px]">
+                <p className="text-xl font-black text-zinc-900 truncate">
                   {stats.topScorer ? stats.topScorer.name : '없음'} 
                   {stats.topScorer && <span className="text-sm font-bold text-zinc-400 ml-1">({stats.topScorer.goals})</span>}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm flex items-center gap-4">
+              <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                <Medal size={24} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">최다 도움왕</p>
+                <p className="text-xl font-black text-zinc-900 truncate">
+                  {stats.topAssistant ? stats.topAssistant.name : '없음'} 
+                  {stats.topAssistant && <span className="text-sm font-bold text-zinc-400 ml-1">({stats.topAssistant.assists})</span>}
                 </p>
               </div>
             </div>
@@ -205,7 +227,7 @@ const MatchList: React.FC<MatchListProps> = ({ isAuthenticated, onViewReport }) 
               <div className="w-12 h-12 bg-zinc-900 rounded-2xl flex items-center justify-center text-white">
                 <TrendingUp size={24} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">승률</p>
                 <p className="text-xl font-black text-zinc-900">{stats.winRate}%</p>
               </div>

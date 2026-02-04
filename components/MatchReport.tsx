@@ -1,17 +1,16 @@
 
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { MatchResult } from '../types';
 import { deleteMatchResult, fetchMatchResults } from '../services/matchService';
 import Logo from './Logo';
+import html2canvas from 'html2canvas';
 import { 
   ArrowLeft, MapPin, Calendar, Footprints, Loader2, Link as LinkIcon,
   CheckCircle2, Image as ImageIcon, AlertCircle, Edit2, Trash2, 
   Download, X, UserCheck, Star
 } from 'lucide-react';
-
-declare var html2canvas: any;
 
 interface MatchReportProps {
   id: string;
@@ -107,29 +106,41 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
 
   const handleDownloadJPG = async () => {
     if (!reportRef.current || !match) return;
-    const canvasLib = (window as any).html2canvas;
-    if (!canvasLib) {
-      showToastMessage('도구를 불러오는 중입니다...', 'error');
-      return;
-    }
+    
     setIsGenerating(true);
     try {
       const element = reportRef.current;
+      
+      // CORS 문제를 피하기 위해 모든 이미지를 Base64로 미리 변환
       const images = Array.from(element.querySelectorAll('img')) as HTMLImageElement[];
-      const base64Images = await Promise.all(images.map(img => toBase64(img.src)));
       const originalSrcs = images.map(img => img.src);
+      
+      const base64Images = await Promise.all(images.map(img => toBase64(img.src)));
       images.forEach((img, i) => { img.src = base64Images[i]; });
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const canvas = await canvasLib(element, { useCORS: true, scale: 2, backgroundColor: '#ffffff' });
+      
+      // 렌더링 동기화를 위해 약간의 지연
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const canvas = await html2canvas(element, { 
+        useCORS: true, 
+        scale: 2, 
+        backgroundColor: '#ffffff',
+        logging: false
+      });
+      
+      // 원본 소스 복구
       images.forEach((img, i) => { img.src = originalSrcs[i]; });
+      
       const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
       const link = document.createElement('a');
       link.href = dataUrl;
       link.download = `MATCH_REPORT_${match.date}_vs_${match.opponent}.jpg`;
       link.click();
+      
       showToastMessage('리포트가 저장되었습니다.', 'success');
     } catch (error) {
-      showToastMessage('저장 실패.', 'error');
+      console.error("JPG 생성 오류:", error);
+      showToastMessage('저장 중 오류가 발생했습니다.', 'error');
     } finally {
       setIsGenerating(false);
     }
@@ -141,13 +152,8 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
   const isWin = match.ourScore > match.opponentScore;
   const isDraw = match.ourScore === match.opponentScore;
 
-  // 득점자 전체 정렬 (5명 제한 제거)
-  const allScorers = [...(match.scorers || [])]
-    .sort((a, b) => b.goals - a.goals);
-
-  // 어시스트 전체 정렬 (5명 제한 제거)
-  const allAssistants = [...(match.assists || [])]
-    .sort((a, b) => b.assists - a.assists);
+  const allScorers = [...(match.scorers || [])].sort((a, b) => b.goals - a.goals);
+  const allAssistants = [...(match.assists || [])].sort((a, b) => b.assists - a.assists);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
@@ -161,7 +167,9 @@ const MatchReport: React.FC<MatchReportProps> = ({ id, onBack, onViewScorerStats
             </>
           )}
           <button onClick={handleShare} className="px-4 py-2 bg-white border rounded-xl font-bold text-zinc-700 hover:border-zinc-400 transition-colors"><LinkIcon size={18} className="inline mr-1" /> 링크</button>
-          <button onClick={handleDownloadJPG} disabled={isGenerating} className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-bold shadow-md hover:bg-emerald-700 transition-colors">{isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} className="inline mr-1" />} JPG 저장</button>
+          <button onClick={handleDownloadJPG} disabled={isGenerating} className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-bold shadow-md hover:bg-emerald-700 transition-colors min-w-[120px] flex items-center justify-center">
+            {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <><Download size={18} className="inline mr-1" /> JPG 저장</>}
+          </button>
         </div>
       </div>
 
